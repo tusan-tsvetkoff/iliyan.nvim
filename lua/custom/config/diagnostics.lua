@@ -16,13 +16,13 @@ vim.diagnostic.config({
     source = "always",
     prefix = function(diagnostic)
       if diagnostic.severity == vim.diagnostic.severity.ERROR then
-        return signs.diagnostics.Error
+        return signs.diagnostics.Error .. " "
       elseif diagnostic.severity == vim.diagnostic.severity.WARN then
-        return signs.diagnostics.Warn
+        return signs.diagnostics.Warn .. " "
       elseif diagnostic.severity == vim.diagnostic.severity.HINT then
-        return signs.diagnostics.Hint
+        return signs.diagnostics.Hint .. " "
       else
-        return signs.diagnostics.Info
+        return signs.diagnostics.Info .. " "
       end
     end,
   },

@@ -31,7 +31,12 @@ require('lazy').setup({
   {
     'neovim/nvim-lspconfig',
     dependencies = {
-      'williamboman/mason.nvim',
+      {
+        'williamboman/mason.nvim',
+        opts = {
+          ensure_installed = { "stylua", "selene", "luacheck", "shellcheck", "shfmt" }
+        }
+      },
       'williamboman/mason-lspconfig.nvim',
 
       -- Useful status updates for LSP
@@ -47,6 +52,7 @@ require('lazy').setup({
       diagnostics = { virtual_text = { prefix = "icons" } }
     }
   },
+
 
   {
     -- Autocompletion
@@ -129,15 +135,6 @@ require('lazy').setup({
         end,
       },
     },
-  },
-
-  {
-    -- Highlight, edit, and navigate code
-    'nvim-treesitter/nvim-treesitter',
-    dependencies = {
-      'nvim-treesitter/nvim-treesitter-textobjects',
-    },
-    build = ':TSUpdate',
   },
 
   require 'kickstart.plugins.autoformat',
@@ -235,12 +232,35 @@ vim.keymap.set('n', '<leader>sd', require('telescope.builtin').diagnostics, { de
 
 vim.defer_fn(function()
   require('nvim-treesitter.configs').setup {
-    -- Add languages to be installed here that you want installed for treesitter
-    ensure_installed = { 'json', 'c', 'cpp', 'go', 'lua', 'python', 'rust', 'tsx', 'javascript', 'typescript', 'vimdoc', 'vim', 'bash' },
+    ensure_installed = {
+      'json',
+      'c',
+      'cpp',
+      'go',
+      'lua',
+      'python',
+      'rust',
+      'tsx',
+      'javascript',
+      'typescript',
+      'vimdoc',
+      'vim',
+      'bash' },
 
-    -- Autoinstall languages that are not installed. Defaults to false (but you can change for yourself!)
-    auto_install = false,
+    refactor = {
+      highlight_definitions = { enable = true },
+      highlight_current_scope = { enable = false },
+      smart_rename = {
+        enable = true,
+        keymaps = {
+          smart_rename = '<leader>v',
+        },
+      },
+    },
 
+    endwise = { enable = true },
+    tree_setter = { enable = true },
+    matchup = { enable = true },
     highlight = { enable = true },
     indent = { enable = true },
     incremental_selection = {
@@ -273,13 +293,13 @@ vim.defer_fn(function()
           [']m'] = '@function.outer',
           [']]'] = '@class.outer',
         },
-        goto_next_end = {
-          [']M'] = '@function.outer',
-          [']['] = '@class.outer',
-        },
         goto_previous_start = {
           ['[m'] = '@function.outer',
           ['[['] = '@class.outer',
+        },
+        goto_next_end = {
+          [']M'] = '@function.outer',
+          [']['] = '@class.outer',
         },
         goto_previous_end = {
           ['[M'] = '@function.outer',
@@ -351,6 +371,7 @@ require('mason').setup()
 require('mason-lspconfig').setup()
 
 local servers = {
+  marksman = {},
   jsonls = {},
   lua_ls = {
     single_file_support = true,
@@ -358,7 +379,15 @@ local servers = {
       workspace = { checkThirdParty = false },
       completion = { callSnippet = 'Both', workspaceWord = true },
       telemetry = { enable = false },
-      diagnostics = { disable = { 'missing-fields', 'trailing_space' } },
+      diagnostics = { disable = { 'missing-fields', 'trailing-space' } },
+      hint = {
+        enable = true,
+        setType = false,
+        paramType = true,
+        paramName = "Disable",
+        semicolon = "Disable",
+        arrayIndex = "Disable",
+      },
     },
   },
 }
@@ -465,7 +494,6 @@ cmp.setup {
     }),
   },
 }
-
 
 -- The line beneath this is called `modeline`. See `:help modeline`
 -- vim: ts=2 sts=2 sw=2 et

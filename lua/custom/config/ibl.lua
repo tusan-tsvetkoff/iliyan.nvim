@@ -2,7 +2,7 @@ local exclude_ft = { "help", "git", "markdown", "snippets", "text", "gitconfig",
 
 require("ibl").setup {
   indent = {
-    char = "▏",
+    char = "", -- or this '' or this '' or this '▏'
   },
   scope = {
     show_start = false,

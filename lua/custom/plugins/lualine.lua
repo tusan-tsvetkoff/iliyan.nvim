@@ -1,12 +1,14 @@
 local fn = vim.fn
+local icons = require("custom.plugins.utils.icons")
 
+---@return string
 local function selectionCount()
   local isVisualMode = fn.mode():find("[Vv]")
   if not isVisualMode then return "" end
   local starts = fn.line("v")
   local ends = fn.line(".")
   local lines = starts <= ends and ends - starts + 1 or starts - ends + 1
-  return " " .. tostring(lines) .. "L " .. tostring(fn.wordcount().visual_chars) .. "C"
+  return "󰉸" .. tostring(lines) .. "L " .. tostring(fn.wordcount().visual_chars) .. "C"
 end
 
 -------------------------------------------------
@@ -25,8 +27,6 @@ return {
     end
   end,
   config = function()
-    local icons = require("custom.plugins.utils.icons")
-    -- require('gruvbox').setup()
     require('lualine').setup({
       options = {
         icons_enabled = true,
@@ -53,13 +53,19 @@ return {
             'filetype',
             colored = true,
             icon_only = true,
-            icon = { align = 'left' }
+            separator = '',
+            padding = { left = 1, right = 0 }
           },
           {
             "filename",
             file_status = true,
             newfile_status = true,
             path = 0,
+            fmt = function(path)
+              ---@diagnostic disable-next-line: param-type-mismatch
+              return table.concat({ vim.fs.basename(vim.fs.dirname(path)),
+                vim.fs.basename(path) }, package.config:sub(1, 1))
+            end,
             symbols = {
               modified = icons.file.ModifiedFile,
               readonly = icons.file.ReadOnlyFile,
@@ -76,7 +82,12 @@ return {
             sections = { 'error', 'warn', 'info', 'hint' },
             icons_enabled = true,
             update_in_insert = true,
-            symbols = { error = icons.diagnostics.Error, warn = icons.diagnostics.Warn, info = icons.diagnostics.Info, hint = icons.diagnostics.Hint },
+            symbols = {
+              error = icons.diagnostics.Error,
+              warn = icons.diagnostics.Warn,
+              info = icons.diagnostics.Info,
+              hint = icons.diagnostics.Hint
+            },
             always_visible = true,
           },
           {
@@ -87,7 +98,10 @@ return {
         lualine_y = {},
         lualine_z = {
           { selectionCount(), padding = { left = 0, right = 1 } },
-          'location'
+          { 'location',       padding = { left = 0, right = 1 } },
+          function()
+            return " " .. os.date("%R")
+          end,
         },
       },
       inactive_sections = {

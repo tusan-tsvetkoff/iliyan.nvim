@@ -59,7 +59,7 @@ opt.colorcolumn = "80"
 o.completeopt = 'menuone,noselect'
 
 -- NOTE: You should make sure your terminal supports this
-o.termguicolors = true
+opt.termguicolors = true
 
 ------------------------Autocommands--------------------------
 -- Stop auto newline continuation of comments
