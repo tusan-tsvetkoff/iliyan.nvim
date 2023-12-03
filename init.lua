@@ -44,6 +44,7 @@ require('lazy').setup({
       inlay_hints = {
         enabled = true
       },
+      diagnostics = { virtual_text = { prefix = "icons" } }
     }
   },
 
@@ -78,6 +79,8 @@ require('lazy').setup({
         topdelete = { text = '‾' },
         changedelete = { text = '~' },
       },
+      numhl = false,  -- Enable hl for line numbers
+      linehl = false, -- Disable the signs column highlight
       on_attach = function(bufnr)
         vim.keymap.set('n', '<leader>hp', require('gitsigns').preview_hunk, { buffer = bufnr, desc = 'Preview git hunk' })
 
@@ -105,20 +108,6 @@ require('lazy').setup({
     },
   },
 
-  {
-    -- Theme inspired by Atom
-    'ellisonleao/gruvbox.nvim',
-    priority = 1000,
-    opts = {
-      contrast = "soft",
-      overrides = {
-        SignColumn = { bg = "#ff9900" }
-      }
-    },
-    config = function()
-      vim.cmd.colorscheme 'gruvbox'
-    end,
-  },
 
   {
     'lukas-reineke/indent-blankline.nvim',
@@ -159,6 +148,9 @@ require('lazy').setup({
 
 -- Sourcing all config files
 require 'custom.config.init'
+
+-- Loading the theme after making sure it's setup
+vim.cmd("colorscheme gruvbox")
 
 local highlight_group = vim.api.nvim_create_augroup('YankHighlight', { clear = true })
 vim.api.nvim_create_autocmd('TextYankPost', {
@@ -473,6 +465,7 @@ cmp.setup {
     }),
   },
 }
+
 
 -- The line beneath this is called `modeline`. See `:help modeline`
 -- vim: ts=2 sts=2 sw=2 et

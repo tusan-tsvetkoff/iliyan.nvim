@@ -47,7 +47,8 @@ opt.sidescrolloff = 8
 opt.isfname:append("@-@")
 
 -- Keep signcolumn on by default
-wo.signcolumn = 'yes'
+-- wo.signcolumn = 'yes'
+opt.signcolumn = 'yes:1'
 
 -- Decrease update time
 o.updatetime = 50

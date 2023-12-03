@@ -1,14 +1,15 @@
 return {
   diagnostics = {
-    Error = '',
-    Warn = '',
-    Info = '',
-    Hint = '',
+    Error = '',
+    Warn = '󱟪',
+    Info = '󰽁',
+    Hint = '',
   },
   git = {
-    Modify = '',
-    Add = '',
-    Delete = '',
+    Branch = '',
+    Modify = '',
+    Add = '',
+    Delete = '',
   },
   file = {
     ModifiedFile = '',
