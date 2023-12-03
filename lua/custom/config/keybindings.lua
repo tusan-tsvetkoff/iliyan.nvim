@@ -1,5 +1,10 @@
 local key = vim.keymap
 
+-- SSR Maps
+key.set({ 'n', 'x' }, "<leader>sr", function() require("ssr").open() end)
+
+-- Incr Rename
+key.set('n', '<leader>rr', ':IncRename ')
 -- this is for the clipboard stuff, not using it rn
 -- key.set({ "n", "v" }, "<leader>y", [["+y]])
 -- key.set("n", "<leader>Y", [["+Y]])

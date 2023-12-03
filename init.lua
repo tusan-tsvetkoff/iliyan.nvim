@@ -1,6 +1,7 @@
 vim.g.mapleader = ' '
 vim.g.maplocalleader = ' '
 
+local icons = require('custom.plugins.utils.icons')
 local lazypath = vim.fn.stdpath 'data' .. '/lazy/lazy.nvim'
 if not vim.loop.fs_stat(lazypath) then
   vim.fn.system {
@@ -30,17 +31,20 @@ require('lazy').setup({
   {
     'neovim/nvim-lspconfig',
     dependencies = {
-      -- Automatically install LSPs to stdpath for neovim
       'williamboman/mason.nvim',
       'williamboman/mason-lspconfig.nvim',
 
       -- Useful status updates for LSP
-      -- NOTE: `opts = {}` is the same as calling `require('fidget').setup({})`
       { 'j-hui/fidget.nvim', opts = {} },
 
       -- Additional lua configuration, makes nvim stuff amazing!
       'folke/neodev.nvim',
     },
+    opts = {
+      inlay_hints = {
+        enabled = true
+      },
+    }
   },
 
   {
@@ -68,9 +72,9 @@ require('lazy').setup({
     opts = {
       -- See `:help gitsigns.txt`
       signs = {
-        add = { text = '+' },
-        change = { text = '~' },
-        delete = { text = '_' },
+        add = { text = icons.git.Add },
+        change = { text = icons.git.Modify },
+        delete = { text = icons.git.Delete },
         topdelete = { text = '‾' },
         changedelete = { text = '~' },
       },
@@ -117,33 +121,8 @@ require('lazy').setup({
   },
 
   {
-    -- Set lualine as statusline
-    'nvim-lualine/lualine.nvim',
-    -- See `:help lualine.txt`
-    opts = {
-      options = {
-        sections = {
-          lualine_x = {
-            {
-              function() return require('copilot_status').status_string() end,
-              cnd = function() return require('copilot_status').enabled() end
-            }
-          },
-          lualine_c = {},
-        },
-        icons_enabled = true,
-        theme = 'gruvbox',
-      },
-    },
-  },
-
-  {
-    -- Add indentation guides even on blank lines
     'lukas-reineke/indent-blankline.nvim',
-    -- Enable `lukas-reineke/indent-blankline.nvim`
-    -- See `:help ibl`
     main = 'ibl',
-    opts = {},
   },
 
   { 'numToStr/Comment.nvim', opts = {} },
@@ -178,9 +157,8 @@ require('lazy').setup({
   { import = 'custom.plugins' },
 }, {})
 
--- set stuff yk
-require 'custom.opts'
-require 'custom.keymaps'
+-- Sourcing all config files
+require 'custom.config.init'
 
 local highlight_group = vim.api.nvim_create_augroup('YankHighlight', { clear = true })
 vim.api.nvim_create_autocmd('TextYankPost', {
@@ -221,6 +199,7 @@ local function find_git_root()
   end
 
   -- Find the Git root directory from the current file's path
+  ---@diagnostic disable-next-line: param-type-mismatch
   local git_root = vim.fn.systemlist("git -C " .. vim.fn.escape(current_dir, " ") .. " rev-parse --show-toplevel")[1]
   if vim.v.shell_error ~= 0 then
     print("Not a git repository. Searching on current working directory")
@@ -259,11 +238,9 @@ vim.keymap.set('n', '<leader>sw', require('telescope.builtin').grep_string, { de
 vim.keymap.set('n', '<leader>sg', require('telescope.builtin').live_grep, { desc = '[S]earch by [G]rep' })
 vim.keymap.set('n', '<leader>sG', ':LiveGrepGitRoot<cr>', { desc = '[S]earch by [G]rep on Git Root' })
 vim.keymap.set('n', '<leader>sd', require('telescope.builtin').diagnostics, { desc = '[S]earch [D]iagnostics' })
-vim.keymap.set('n', '<leader>sr', require('telescope.builtin').resume, { desc = '[S]earch [R]esume' })
+-- Using this keybinding for ssr.nvim instead
+-- vim.keymap.set('n', '<leader>sr', require('telescope.builtin').resume, { desc = '[S]earch [R]esume' })
 
--- [[ Configure Treesitter ]]
--- See `:help nvim-treesitter`
--- Defer Treesitter setup after first render to improve startup time of 'nvim {filename}'
 vim.defer_fn(function()
   require('nvim-treesitter.configs').setup {
     -- Add languages to be installed here that you want installed for treesitter
@@ -330,8 +307,6 @@ vim.defer_fn(function()
   }
 end, 0)
 
--- [[ Configure LSP ]]
---  This function gets run when an LSP connects to a particular buffer.
 local on_attach = function(_, bufnr)
   local nmap = function(keys, func, desc)
     if desc then
@@ -386,10 +361,12 @@ require('mason-lspconfig').setup()
 local servers = {
   jsonls = {},
   lua_ls = {
+    single_file_support = true,
     Lua = {
       workspace = { checkThirdParty = false },
+      completion = { callSnippet = 'Both', workspaceWord = true },
       telemetry = { enable = false },
-      diagnostics = { disable = { 'missing-fields' } },
+      diagnostics = { disable = { 'missing-fields', 'trailing_space' } },
     },
   },
 }
