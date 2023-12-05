@@ -2,7 +2,7 @@ local exclude_ft = { "help", "git", "markdown", "snippets", "text", "gitconfig",
 
 require("ibl").setup {
   indent = {
-    char = "", -- or this '' or this '' or this '▏'
+    char = "▏", -- or this '' or this '' or this '▏'
   },
   scope = {
     show_start = false,
@@ -16,10 +16,9 @@ require("ibl").setup {
   }
 }
 
-
 local gid = vim.api.nvim_create_augroup("indent_blankline", { clear = true })
 vim.api.nvim_create_autocmd("InsertEnter", {
-  pattern = "*", -- buffer local
+  pattern = "*",
   group = gid,
   command = "IBLDisable",
 })

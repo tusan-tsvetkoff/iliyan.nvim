@@ -4,9 +4,18 @@ return {
     local notify = require("notify")
 
     notify.setup({
-      stages = "static",
+      stages = "fade",
       render = "compact",
       top_down = true,
+      window = {
+        opacity = {
+          10,
+          8,
+          6,
+          4,
+          2,
+        }
+      },
     })
 
     vim.notify = notify
