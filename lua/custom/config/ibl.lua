@@ -1,8 +1,9 @@
-local exclude_ft = { "help", "git", "markdown", "snippets", "text", "gitconfig", "alpha", "dashboard" }
+local exclude_ft = { 'help', 'git', 'markdown', 'snippets', 'text', 'gitconfig', 'alpha', 'dashboard' }
 
-require("ibl").setup {
+require('ibl').setup {
   indent = {
-    char = "▏", -- or this '' or this '' or this '▏'
+    char = '▏', -- or this '' or this '' or this '▏'
+    tab_char = '▏',
   },
   scope = {
     show_start = false,
@@ -11,24 +12,24 @@ require("ibl").setup {
   exclude = {
     filetypes = exclude_ft,
     buftypes = {
-      "terminal",
+      'terminal',
     },
-  }
+  },
 }
 
-local gid = vim.api.nvim_create_augroup("indent_blankline", { clear = true })
-vim.api.nvim_create_autocmd("InsertEnter", {
-  pattern = "*",
+local gid = vim.api.nvim_create_augroup('indent_blankline', { clear = true })
+vim.api.nvim_create_autocmd('InsertEnter', {
+  pattern = '*',
   group = gid,
-  command = "IBLDisable",
+  command = 'IBLDisable',
 })
 
-vim.api.nvim_create_autocmd("InsertLeave", {
-  pattern = "*",
+vim.api.nvim_create_autocmd('InsertLeave', {
+  pattern = '*',
   group = gid,
   callback = function()
     if not vim.tbl_contains(exclude_ft, vim.bo.filetype) then
-      vim.cmd([[IBLEnable]])
+      vim.cmd [[IBLEnable]]
     end
   end,
 })

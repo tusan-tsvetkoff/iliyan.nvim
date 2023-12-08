@@ -3,9 +3,15 @@ scriptencoding utf-8
 set pumheight=10  " Maximum number of items to show in popup menu
 set pumblend=10  " pseudo transparency for completion menu
 
+set matchpairs+=<:>,「:」,『:』,【:】,“:”,‘:’,《:》
+
+highlight FloatBorder  ctermfg=NONE ctermbg=NONE cterm=NONE
+
 set noshowmode
 
-set winblend=0  " pseudo transparency for floating window
+set winblend=10  " pseudo transparency for floating window
+set pumheight=8
+set pumblend=10
 
 " Set up cursor color and shape in various mode, ref:
 " https://github.com/neovim/neovim/wiki/FAQ#how-to-change-cursor-color-in-the-terminal

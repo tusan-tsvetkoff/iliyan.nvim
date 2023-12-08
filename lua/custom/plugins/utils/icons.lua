@@ -16,5 +16,5 @@ return {
     ReadOnlyFile = '',
     UnNamedFile = '󱀶',
     NewFile = '',
-  }
+  },
 }

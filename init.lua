@@ -22,12 +22,12 @@ require('lazy').setup({
   'onsails/lspkind.nvim',
 
   -- Modern matchit implementation
-  { 'andymass/vim-matchup',     event = 'BufRead' },
-  { 'tpope/vim-scriptease',     cmd = { 'Scriptnames', 'Message', 'Verbose' } },
+  { 'andymass/vim-matchup', event = 'BufRead' },
+  { 'tpope/vim-scriptease', cmd = { 'Scriptnames', 'Message', 'Verbose' } },
 
   -- Asynchronous command execution
-  { 'skywind3000/asyncrun.vim', lazy = true,                                  cmd = { 'AsyncRun' } },
-  { 'cespare/vim-toml',         ft = { 'toml' },                              branch = 'main' },
+  { 'skywind3000/asyncrun.vim', lazy = true, cmd = { 'AsyncRun' } },
+  { 'cespare/vim-toml', ft = { 'toml' }, branch = 'main' },
   {
     'rust-lang/rust.vim',
     ft = 'rust',
@@ -63,6 +63,7 @@ require('lazy').setup({
       'folke/neodev.nvim',
     },
   },
+
   {
     -- Autocompletion
     'hrsh7th/nvim-cmp',
@@ -122,7 +123,7 @@ require('lazy').setup({
           text = '~',
         },
       },
-      numhl = false,  -- Enable hl for line numbers
+      numhl = false, -- Enable hl for line numbers
       linehl = false, -- Disable the signs column highlight
       on_attach = function(bufnr)
         vim.keymap.set('n', '<leader>hp', require('gitsigns').preview_hunk, {
@@ -191,21 +192,11 @@ require('lazy').setup({
 
 require 'custom.config.init'
 
+local vim_path = vim.fn.stdpath 'config'
 local vimopts = 'options.vim'
-local path = string.format('%s%s', './', vimopts)
+local path = string.format('%s/%s', vim_path, vimopts)
 local source_cmd = 'source ' .. path
 vim.cmd(source_cmd)
-
-local highlight_group = vim.api.nvim_create_augroup('YankHighlight', {
-  clear = true,
-})
-vim.api.nvim_create_autocmd('TextYankPost', {
-  callback = function()
-    vim.highlight.on_yank()
-  end,
-  group = highlight_group,
-  pattern = '*',
-})
 
 require('telescope').setup {
   defaults = {
@@ -299,109 +290,6 @@ vim.keymap.set('n', '<leader>sd', require('telescope.builtin').diagnostics, {
 -- Using this keybinding for ssr.nvim instead
 -- vim.keymap.set('n', '<leader>sr', require('telescope.builtin').resume, { desc = '[S]earch [R]esume' })
 
-local on_attach = function(client, bufnr)
-  local nmap = function(keys, func, desc)
-    if desc then
-      desc = 'LSP: ' .. desc
-    end
-
-    vim.keymap.set('n', keys, func, {
-      buffer = bufnr,
-      desc = desc,
-    })
-
-    local api = vim.api
-    local diagnostic = vim.diagnostic
-    local lsp = vim.lsp
-
-    if client.server_capabilities.documentHighlightProvider then
-      api.nvim_create_autocmd('CursorHold', {
-        buffer = bufnr,
-        callback = function()
-          local float_opts = {
-            focusable = false,
-            close_events = { 'BufLeave', 'CursorMoved', 'InsertEnter', 'FocusLost' },
-            border = 'rounded',
-            source = 'always', -- show source in diagnostic popup window
-            prefix = ' ',
-          }
-
-          if not vim.b.diagnostics_pos then
-            vim.b.diagnostics_pos = { nil, nil }
-          end
-
-          local cursor_pos = api.nvim_win_get_cursor(0)
-          if (cursor_pos[1] ~= vim.b.diagnostics_pos[1] or cursor_pos[2] ~= vim.b.diagnostics_pos[2]) and #diagnostic.get() > 0 then
-            diagnostic.open_float(nil, float_opts)
-          end
-
-          vim.b.diagnostics_pos = cursor_pos
-        end,
-      })
-      vim.cmd [[
-      hi! link LspReferenceRead Visual
-      hi! link LspReferenceText Visual
-      hi! link LspReferenceWrite Visual
-    ]]
-
-      local gid = api.nvim_create_augroup('lsp_document_highlight', { clear = true })
-      api.nvim_create_autocmd('CursorHold', {
-        group = gid,
-        buffer = bufnr,
-        callback = function()
-          lsp.buf.document_highlight()
-        end,
-      })
-
-      api.nvim_create_autocmd('CursorMoved', {
-        group = gid,
-        buffer = bufnr,
-        callback = function()
-          lsp.buf.clear_references()
-        end,
-      })
-    end
-
-    if vim.g.logging_level == 'debug' then
-      local msg = string.format('Language server %s started!', client.name)
-      vim.notify(msg, vim.log.levels.DEBUG, { title = 'Nvim-config' })
-    end
-
-    vim.lsp.handlers['textDocument/hover'] = vim.lsp.with(vim.lsp.handlers.hover, {
-      border = 'rounded',
-    })
-  end
-
-  nmap('<leader>rn', vim.lsp.buf.rename, '[R]e[n]ame')
-  nmap('<leader>ca', vim.lsp.buf.code_action, '[C]ode [A]ction')
-
-  nmap('gd', require('telescope.builtin').lsp_definitions, '[G]oto [D]efinition')
-  nmap('gr', require('telescope.builtin').lsp_references, '[G]oto [R]eferences')
-  nmap('gi', require('telescope.builtin').lsp_implementations, '[G]oto [I]mplementation')
-  nmap('<leader>D', require('telescope.builtin').lsp_type_definitions, 'Type [D]efinition')
-  nmap('<leader>ds', require('telescope.builtin').lsp_document_symbols, '[D]ocument [S]ymbols')
-  nmap('<leader>ws', require('telescope.builtin').lsp_dynamic_workspace_symbols, '[W]orkspace [S]ymbols')
-
-  -- See `:help K` for why this keymap
-  nmap('K', vim.lsp.buf.hover, 'Hover Documentation')
-  nmap('<C-k>', vim.lsp.buf.signature_help, 'Signature Documentation')
-
-  -- Lesser used LSP functionality
-  nmap('gD', vim.lsp.buf.declaration, '[G]oto [D]eclaration')
-  nmap('<leader>wa', vim.lsp.buf.add_workspace_folder, '[W]orkspace [A]dd Folder')
-  nmap('<leader>wr', vim.lsp.buf.remove_workspace_folder, '[W]orkspace [R]emove Folder')
-  nmap('<leader>wl', function()
-    print(vim.inspect(vim.lsp.buf.list_workspace_folders()))
-  end, '[W]orkspace [L]ist Folders')
-
-  -- Create a command `:Format` local to the LSP buffer
-  vim.api.nvim_buf_create_user_command(bufnr, 'Format', function(_)
-    vim.lsp.buf.format()
-  end, {
-    desc = 'Format current buffer with LSP',
-  })
-end
-
 -- document existing key chains
 require('which-key').register {
   ['<leader>c'] = {
@@ -468,8 +356,8 @@ local servers = {
         enable = true,
         defaultConfig = {
           indent_style = 'space',
-          indent_size = 4,
-          continuation_indent_size = 4,
+          indent_size = 2,
+          continuation_indent_size = 2,
         },
       },
     },
@@ -496,7 +384,7 @@ mason_lspconfig.setup_handlers {
   function(server_name)
     lspconfig[server_name].setup {
       capabilities = capabilities,
-      on_attach = on_attach,
+      on_attach = require('custom.config.others').custom_on_attach,
       settings = servers[server_name],
       filetypes = (servers[server_name] or {}).filetypes,
     }
@@ -505,7 +393,7 @@ mason_lspconfig.setup_handlers {
 
 require('rust-tools').setup {
   server = {
-    on_attach = on_attach,
+    on_attach = require('custom.config.others').custom_on_attach,
     capabilities = capabilities,
   },
 }
