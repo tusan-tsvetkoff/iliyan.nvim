@@ -2,7 +2,7 @@ return {
   'nvim-treesitter/nvim-treesitter',
   dependencies = {
     'nvim-treesitter/nvim-treesitter-textobjects',
-    "haringsrob/nvim_context_vt",
+    'haringsrob/nvim_context_vt',
   },
   build = ':TSUpdate',
   event = 'VeryLazy',
@@ -21,31 +21,38 @@ return {
       'typescript',
       'vimdoc',
       'vim',
-      'bash' },
+      'bash',
+      'c_sharp',
+    },
 
-    refactor = {
-      highlight_definitions = { enable = true },
-      highlight_current_scope = { enable = false },
-      smart_rename = {
-        enable = true,
-        keymaps = {
-          smart_rename = '<leader>v',
-        },
-      },
-    },
-    endwise = { enable = true },
-    tree_setter = { enable = true },
-    matchup = { enable = true },
-    highlight = { enable = true },
-    incremental_selection = {
+    -- refactor = {
+    --   highlight_definitions = { enable = true },
+    --   highlight_current_scope = { enable = false },
+    --   smart_rename = {
+    --     enable = true,
+    --     keymaps = {
+    --       smart_rename = '<leader>v',
+    --     },
+    --   },
+    -- },
+    -- endwise = { enable = true },
+    -- tree_setter = { enable = true },
+    -- matchup = { enable = true },
+    highlight = {
       enable = true,
-      keymaps = {
-        init_selection = '<c-space>',
-        node_incremental = '<c-space>',
-        scope_incremental = '<c-s>',
-        node_decremental = '<M-space>',
-      },
+      indent = { enable = true },
     },
+
+    -- incremental_selection = {
+    --   enable = true,
+    --   keymaps = {
+    --     init_selection = '<c-space>',
+    --     node_incremental = '<c-space>',
+    --     scope_incremental = '<c-s>',
+    --     node_decremental = '<M-space>',
+    --   },
+    -- },
+
     textobjects = {
       select = {
         enable = true,
@@ -90,5 +97,8 @@ return {
         },
       },
     },
-  }
+  },
+  config = function(_, opts)
+    require('nvim-treesitter.configs').setup(opts)
+  end,
 }

@@ -5,17 +5,13 @@ set pumblend=10  " pseudo transparency for completion menu
 
 set matchpairs+=<:>,「:」,『:』,【:】,“:”,‘:’,《:》
 
-highlight FloatBorder  ctermfg=NONE ctermbg=NONE cterm=NONE
+" highlight FloatBorder  ctermfg=NONE ctermbg=NONE cterm=NONE
 
 set noshowmode
 
 set winblend=10  " pseudo transparency for floating window
 set pumheight=8
 set pumblend=10
-
-" Set up cursor color and shape in various mode, ref:
-" https://github.com/neovim/neovim/wiki/FAQ#how-to-change-cursor-color-in-the-terminal
-" set guicursor=n-v-c:block-Cursor/lCursor,i-ci-ve:ver25-Cursor2/lCursor2,r-cr:hor20,o:hor20
 
 " Do not show "match xx of xx" and other messages during auto-completion
 set shortmess+=c

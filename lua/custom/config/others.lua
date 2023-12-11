@@ -20,58 +20,32 @@ M.custom_on_attach = function(client, bufnr)
 
     local _border = 'rounded'
 
-    if client.server_capabilities.documentHighlightProvider then
-      api.nvim_create_autocmd('CursorHold', {
-        buffer = bufnr,
-        callback = function()
-          local float_opts = {
-            focusable = false,
-            close_events = { 'BufLeave', 'CursorMoved', 'InsertEnter', 'FocusLost' },
-            border = _border,
-            style = 'minimal',
-            source = 'always', -- show source in oiagnostic popup window
-            prefix = ' ',
-          }
-
-          if not vim.b.diagnostics_pos then
-            vim.b.diagnostics_pos = { nil, nil }
-          end
-
-          local cursor_pos = api.nvim_win_get_cursor(0)
-          if (cursor_pos[1] ~= vim.b.diagnostics_pos[1] or cursor_pos[2] ~= vim.b.diagnostics_pos[2]) and #diagnostic.get() > 0 then
-            diagnostic.open_float(nil, float_opts)
-          end
-
-          vim.b.diagnostics_pos = cursor_pos
-        end,
-      })
-      vim.cmd [[
+    vim.cmd [[
       hi! link LspReferenceRead Visual
       hi! link LspReferenceText Visual
       hi! link LspReferenceWrite Visual
     ]]
 
-      vim.cmd [[
+    vim.cmd [[
         hi! link FloatBorder Normal
       ]]
 
-      local gid = api.nvim_create_augroup('lsp_document_highlight', { clear = true })
-      api.nvim_create_autocmd('CursorHold', {
-        group = gid,
-        buffer = bufnr,
-        callback = function()
-          lsp.buf.document_highlight()
-        end,
-      })
+    local gid = api.nvim_create_augroup('lsp_document_highlight', { clear = true })
+    api.nvim_create_autocmd('CursorHold', {
+      group = gid,
+      buffer = bufnr,
+      callback = function()
+        lsp.buf.document_highlight()
+      end,
+    })
 
-      api.nvim_create_autocmd('CursorMoved', {
-        group = gid,
-        buffer = bufnr,
-        callback = function()
-          lsp.buf.clear_references()
-        end,
-      })
-    end
+    api.nvim_create_autocmd('CursorMoved', {
+      group = gid,
+      buffer = bufnr,
+      callback = function()
+        lsp.buf.clear_references()
+      end,
+    })
 
     if vim.g.logging_level == 'debug' then
       local msg = string.format('Language server %s started!', client.name)
@@ -80,22 +54,19 @@ M.custom_on_attach = function(client, bufnr)
 
     vim.lsp.handlers['textDocument/hover'] = vim.lsp.with(vim.lsp.handlers.hover, {
       border = _border,
-      style = 'minimal',
     })
 
     vim.lsp.handlers['textDocument/signatureHelp'] = vim.lsp.with(vim.lsp.handlers.signature_help, {
       border = _border,
-      style = 'minimal',
     })
 
     require('lspconfig.ui.windows').default_options = {
       border = _border,
-      style = 'minimal',
     }
   end
 
   nmap('<leader>rn', vim.lsp.buf.rename, '[R]e[n]ame')
-  nmap('<leader>ca', vim.lsp.buf.code_action, '[C]ode [A]ction')
+  -- nmap('<leader>ca', vim.lsp.buf.code_action, '[C]ode [A]ction')
 
   nmap('gd', require('telescope.builtin').lsp_definitions, '[G]oto [D]efinition')
   nmap('gr', require('telescope.builtin').lsp_references, '[G]oto [R]eferences')

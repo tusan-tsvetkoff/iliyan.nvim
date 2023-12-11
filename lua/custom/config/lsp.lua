@@ -1,62 +1,77 @@
-local api = vim.api
-local lsp = vim.lsp
-local diagnostic = vim.diagnostic
+require('mason').setup()
+require('mason-lspconfig').setup()
 
-local custom_attach = function(client, bufnr)
-  if client.server_capabilities.documentHighlightProvider then
-    api.nvim_create_autocmd('CursorHold', {
-      buffer = bufnr,
-      callback = function()
-        local float_opts = {
-          focusable = false,
-          close_events = { 'BufLeave', 'CursorMoved', 'InsertEnter', 'FocusLost' },
-          border = 'rounded',
-          source = 'always', -- show source in diagnostic popup window
-          prefix = ' ',
-        }
+local servers = {
+  vimls = {},
+  marksman = {},
+  jsonls = {},
+  lua_ls = {
+    single_file_support = true,
+    Lua = {
+      workspace = {
+        checkThirdParty = false,
+      },
+      completion = {
+        callSnippet = 'Both',
+        workspaceWord = true,
+      },
+      telemetry = {
+        enable = false,
+      },
+      diagnostics = {
+        disable = { 'missing-fields', 'trailing-space' },
+      },
+      hint = {
+        enable = true,
+        setType = false,
+        paramType = true,
+        paramName = 'Disable',
+        semicolon = 'Disable',
+        arrayIndex = 'Disable',
+      },
+      format = {
+        enable = true,
+        defaultConfig = {
+          indent_style = 'space',
+          indent_size = 2,
+          continuation_indent_size = 2,
+        },
+      },
+    },
+  },
+}
 
-        if not vim.b.diagnostics_pos then
-          vim.b.diagnostics_pos = { nil, nil }
-        end
+-- Setup neovim lua configuration
+require('neodev').setup {}
+local on_attach = require('custom.config.others').custom_on_attach
 
-        local cursor_pos = api.nvim_win_get_cursor(0)
-        if (cursor_pos[1] ~= vim.b.diagnostics_pos[1] or cursor_pos[2] ~= vim.b.diagnostics_pos[2]) and #diagnostic.get() > 0 then
-          diagnostic.open_float(nil, float_opts)
-        end
+-- nvim-cmp supports additional completion capabilities, so broadcast that to servers
+local capabilities = vim.lsp.protocol.make_client_capabilities()
+capabilities = require('cmp_nvim_lsp').default_capabilities(capabilities)
 
-        vim.b.diagnostics_pos = cursor_pos
-      end,
-    })
-    vim.cmd [[
-      hi! link LspReferenceRead Visual
-      hi! link LspReferenceText Visual
-      hi! link LspReferenceWrite Visual
-    ]]
+-- Ensure the servers above are installed
+local mason_lspconfig = require 'mason-lspconfig'
 
-    local gid = api.nvim_create_augroup('lsp_document_highlight', { clear = true })
-    api.nvim_create_autocmd('CursorHold', {
-      group = gid,
-      buffer = bufnr,
-      callback = function()
-        lsp.buf.document_highlight()
-      end,
-    })
+mason_lspconfig.setup {
+  ensure_installed = vim.tbl_keys(servers),
+}
 
-    api.nvim_create_autocmd('CursorMoved', {
-      group = gid,
-      buffer = bufnr,
-      callback = function()
-        lsp.buf.clear_references()
-      end,
-    })
-  end
+local lspconfig = require 'lspconfig'
 
-  if vim.g.logging_level == 'debug' then
-    local msg = string.format('Language server %s started!', client.name)
-    vim.notify(msg, vim.log.levels.DEBUG, { title = 'Nvim-config' })
-  end
+mason_lspconfig.setup_handlers {
+  function(server_name)
+    lspconfig[server_name].setup {
+      capabilities = capabilities,
+      on_attach = on_attach,
+      settings = servers[server_name],
+      filetypes = (servers[server_name] or {}).filetypes,
+    }
+  end,
+}
 
-  vim.lsp.handlers['textDocument/hover'] = vim.lsp.with(vim.lsp.handlers.hover, {
-    border = 'rounded',
-  })
-end
+require('rust-tools').setup {
+  server = {
+    on_attach = on_attach,
+    capabilities = capabilities,
+  },
+}

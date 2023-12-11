@@ -1,33 +1,44 @@
-local o = vim.o
 local opt = vim.opt
+vim.g.loaded_netrw = 1
+vim.g.loaded_netrwPlugin = 1
+vim.g.loaded_matchparen = 1
 
+vim.g['OmniSharp_server_path'] = 'OmniSharp'
 --------------------------------------------------------
-o.hlsearch = false
-o.incsearch = true
+opt.hlsearch = false
+opt.incsearch = true
+
+opt.showmatch = true
+opt.errorbells = false
 
 -- Enable mouse mode
-o.mouse = 'a'
-o.mousemoveevent = true
+opt.mouse = 'a'
+opt.mousemoveevent = true
 opt.cursorline = true
 
+opt.cmdheight = 1
+opt.inccommand = 'split'
+
+opt.hidden = true
+
 -- Soy
-o.clipboard = 'unnamedplus'
+opt.clipboard = 'unnamedplus'
 
 -- Enable break indent
-o.breakindent = true
+opt.breakindent = true
 
 -- Save undo history
-o.undofile = true
+opt.undofile = true
 
 -- Case-insensitive searching UNLESS \C or capital in search
-o.ignorecase = true
-o.smartcase = true
+opt.ignorecase = true
+opt.smartcase = true
 
 -- Always block cursor
 opt.guicursor = 'n-v-c-i:block'
 
-o.nu = true
-o.relativenumber = true
+opt.nu = true
+opt.relativenumber = true
 
 opt.tabstop = 2
 opt.softtabstop = 2
@@ -36,6 +47,7 @@ opt.expandtab = true
 opt.shiftround = true
 
 opt.smartindent = true
+opt.smarttab = true
 
 opt.backup = false
 opt.swapfile = false
@@ -48,11 +60,11 @@ opt.isfname:append '@-@'
 opt.signcolumn = 'yes:1'
 
 -- Decrease update time
-o.updatetime = 50
+opt.updatetime = 50
 
 opt.colorcolumn = '80'
 
 -- Set completeopt to have a better completion experience
-o.completeopt = 'menuone,noselect'
+opt.completeopt = { 'menuone', 'noselect' }
 
 opt.termguicolors = true

@@ -1,8 +1,8 @@
 vim.g.mapleader = ' '
 vim.g.maplocalleader = ' '
 
-local icons = require 'custom.plugins.utils.icons'
 local lazypath = vim.fn.stdpath 'data' .. '/lazy/lazy.nvim'
+
 if not vim.loop.fs_stat(lazypath) then
   vim.fn.system {
     'git',
@@ -13,14 +13,11 @@ if not vim.loop.fs_stat(lazypath) then
     lazypath,
   }
 end
+
 vim.opt.rtp:prepend(lazypath)
 require('lazy').setup({
-
-  'tpope/vim-fugitive',
-  'tpope/vim-rhubarb',
-  'tpope/vim-sleuth',
-  'onsails/lspkind.nvim',
-
+  'jmederosalvarado/roslyn.nvim',
+  { 'Hoffs/omnisharp-extended-lsp.nvim', lazy = true },
   -- Modern matchit implementation
   { 'andymass/vim-matchup', event = 'BufRead' },
   { 'tpope/vim-scriptease', cmd = { 'Scriptnames', 'Message', 'Verbose' } },
@@ -28,17 +25,6 @@ require('lazy').setup({
   -- Asynchronous command execution
   { 'skywind3000/asyncrun.vim', lazy = true, cmd = { 'AsyncRun' } },
   { 'cespare/vim-toml', ft = { 'toml' }, branch = 'main' },
-  {
-    'rust-lang/rust.vim',
-    ft = 'rust',
-    init = function()
-      vim.g.rustfmt_autosave = 1
-    end,
-  },
-  {
-    'simrat39/rust-tools.nvim',
-    ft = 'rust',
-  },
   {
     'jonahgoldwastaken/copilot-status.nvim',
     dependencies = { 'zbirenbaum/copilot.lua' },
@@ -52,9 +38,12 @@ require('lazy').setup({
       {
         'williamboman/mason.nvim',
         opts = {
-          ensure_installed = { 'stylua', 'selene', 'luacheck', 'shellcheck', 'shfmt' },
+          ui = {
+            border = 'rounded',
+          },
         },
       },
+
       'williamboman/mason-lspconfig.nvim', -- Useful status updates for LSP
       {
         'j-hui/fidget.nvim',
@@ -68,7 +57,7 @@ require('lazy').setup({
     -- Autocompletion
     'hrsh7th/nvim-cmp',
     event = 'InsertEnter',
-    dependencies = { -- Snippet Engine & its associated nvim-cmp source
+    dependencies = {
       {
         'L3MON4D3/LuaSnip',
         dependencies = {
@@ -107,21 +96,12 @@ require('lazy').setup({
     opts = {
       -- See `:help gitsigns.txt`
       signs = {
-        add = {
-          text = icons.git.Add,
-        },
-        change = {
-          text = icons.git.Modify,
-        },
-        delete = {
-          text = icons.git.Delete,
-        },
-        topdelete = {
-          text = '‾',
-        },
-        changedelete = {
-          text = '~',
-        },
+        add = { text = '▎' },
+        change = { text = '▎' },
+        delete = { text = '' },
+        topdelete = { text = '' },
+        changedelete = { text = '▎' },
+        untracked = { text = '▎' },
       },
       numhl = false, -- Enable hl for line numbers
       linehl = false, -- Disable the signs column highlight
@@ -130,6 +110,11 @@ require('lazy').setup({
           buffer = bufnr,
           desc = 'Preview git hunk',
         })
+
+        local present_scrollbar = pcall(require, 'scrollbar')
+        if present_scrollbar then
+          require('scrollbar.handlers.gitsigns').setup()
+        end
 
         -- don't override the built-in and fugitive keymaps
         local gs = package.loaded.gitsigns
@@ -183,6 +168,18 @@ require('lazy').setup({
         end,
       },
     },
+    config = function()
+      require('telescope').setup {
+        defaults = {
+          mappings = {
+            i = {
+              ['<C-u>'] = false,
+              ['<C-d>'] = false,
+            },
+          },
+        },
+      }
+    end,
   },
   require 'kickstart.plugins.autoformat',
   {
@@ -191,104 +188,6 @@ require('lazy').setup({
 }, {})
 
 require 'custom.config.init'
-
-local vim_path = vim.fn.stdpath 'config'
-local vimopts = 'options.vim'
-local path = string.format('%s/%s', vim_path, vimopts)
-local source_cmd = 'source ' .. path
-vim.cmd(source_cmd)
-
-require('telescope').setup {
-  defaults = {
-    mappings = {
-      i = {
-        ['<C-u>'] = false,
-        ['<C-d>'] = false,
-      },
-    },
-  },
-}
-
--- Enable telescope fzf native, if installed
-pcall(require('telescope').load_extension, 'fzf')
-
--- Telescope live_grep in git root
--- Function to find the git root directory based on the current buffer's path
-local function find_git_root()
-  -- Use the current buffer's path as the starting point for the git search
-  local current_file = vim.api.nvim_buf_get_name(0)
-  local current_dir
-  local cwd = vim.fn.getcwd()
-  -- If the buffer is not associated with a file, return nil
-  if current_file == '' then
-    current_dir = cwd
-  else
-    -- Extract the directory from the current file's path
-    current_dir = vim.fn.fnamemodify(current_file, ':h')
-  end
-
-  -- Find the Git root directory from the current file's path
-  ---@diagnostic disable-next-line: param-type-mismatch
-  local git_root = vim.fn.systemlist('git -C ' .. vim.fn.escape(current_dir, ' ') .. ' rev-parse --show-toplevel')[1]
-  if vim.v.shell_error ~= 0 then
-    print 'Not a git repository. Searching on current working directory'
-    return cwd
-  end
-  return git_root
-end
-
--- Custom live_grep function to search in git root
-local function live_grep_git_root()
-  local git_root = find_git_root()
-  if git_root then
-    require('telescope.builtin').live_grep {
-      search_dirs = { git_root },
-    }
-  end
-end
-
-vim.api.nvim_create_user_command('LiveGrepGitRoot', live_grep_git_root, {})
-
--- See `:help telescope.builtin`
-vim.keymap.set('n', '<leader>?', require('telescope.builtin').oldfiles, {
-  desc = '[?] Find recently opened files',
-})
-vim.keymap.set('n', '<leader><space>', require('telescope.builtin').buffers, {
-  desc = '[ ] Find existing buffers',
-})
-vim.keymap.set('n', '<leader>/', function()
-  -- You can pass additional configuration to telescope to change theme, layout, etc.
-  require('telescope.builtin').current_buffer_fuzzy_find(require('telescope.themes').get_dropdown {
-    winblend = 10,
-    previewer = false,
-  })
-end, {
-  desc = '[/] Fuzzily search in current buffer',
-})
-
-vim.keymap.set('n', '<leader>gf', require('telescope.builtin').git_files, {
-  desc = 'Search [G]it [F]iles',
-})
-vim.keymap.set('n', '<leader>sf', require('telescope.builtin').find_files, {
-  desc = '[S]earch [F]iles',
-})
-vim.keymap.set('n', '<leader>sh', require('telescope.builtin').help_tags, {
-  desc = '[S]earch [H]elp',
-})
-vim.keymap.set('n', '<leader>sw', require('telescope.builtin').grep_string, {
-  desc = '[S]earch current [W]ord',
-})
-vim.keymap.set('n', '<leader>sg', require('telescope.builtin').live_grep, {
-  desc = '[S]earch by [G]rep',
-})
-vim.keymap.set('n', '<leader>sG', ':LiveGrepGitRoot<cr>', {
-  desc = '[S]earch by [G]rep on Git Root',
-})
-vim.keymap.set('n', '<leader>sd', require('telescope.builtin').diagnostics, {
-  desc = '[S]earch [D]iagnostics',
-})
--- Using this keybinding for ssr.nvim instead
--- vim.keymap.set('n', '<leader>sr', require('telescope.builtin').resume, { desc = '[S]earch [R]esume' })
 
 -- document existing key chains
 require('which-key').register {
@@ -326,6 +225,8 @@ require('mason').setup()
 require('mason-lspconfig').setup()
 
 local servers = {
+  -- omnisharp = {},
+  vimls = {},
   marksman = {},
   jsonls = {},
   lua_ls = {
@@ -364,8 +265,11 @@ local servers = {
   },
 }
 
+require('barbecue').setup {}
+
 -- Setup neovim lua configuration
 require('neodev').setup {}
+local custom_on_attach = require('custom.config.others').custom_on_attach
 
 -- nvim-cmp supports additional completion capabilities, so broadcast that to servers
 local capabilities = vim.lsp.protocol.make_client_capabilities()
@@ -384,18 +288,103 @@ mason_lspconfig.setup_handlers {
   function(server_name)
     lspconfig[server_name].setup {
       capabilities = capabilities,
-      on_attach = require('custom.config.others').custom_on_attach,
+      on_attach = custom_on_attach,
       settings = servers[server_name],
       filetypes = (servers[server_name] or {}).filetypes,
     }
   end,
+  ['omnisharp'] = function()
+    lspconfig['omnisharp'].setup {
+      on_attach = custom_on_attach,
+      capabilities = capabilities,
+      root_dir = function(fname)
+        local primary = lspconfig.util.root_pattern '*.sln'(fname)
+        local fallback = lspconfig.util.root_pattern '*.csproj'(fname)
+        return primary or fallback
+      end,
+      on_new_config = function(new_config, new_root_dir)
+        if new_root_dir then
+          table.insert(new_config.cmd, '-z') -- https://github.com/OmniSharp/omnisharp-vscode/pull/4300
+          vim.list_extend(new_config.cmd, { '-s', new_root_dir })
+          vim.list_extend(new_config.cmd, { '--hostPID', tostring(vim.fn.getpid()) })
+          table.insert(new_config.cmd, 'DotNet:enablePackageRestore=false')
+          vim.list_extend(new_config.cmd, { '--encoding', 'utf-8' })
+          table.insert(new_config.cmd, '--languageserver')
+
+          if new_config.enable_editorconfig_support then
+            table.insert(new_config.cmd, 'FormattingOptions:EnableEditorConfigSupport=true')
+          end
+
+          if new_config.organize_imports_on_format then
+            table.insert(new_config.cmd, 'FormattingOptions:OrganizeImports=true')
+          end
+
+          if new_config.enable_ms_build_load_projects_on_demand then
+            table.insert(new_config.cmd, 'MsBuild:LoadProjectsOnDemand=true')
+          end
+
+          if new_config.enable_roslyn_analyzers then
+            table.insert(new_config.cmd, 'RoslynExtensionsOptions:EnableAnalyzersSupport=true')
+          end
+
+          if new_config.enable_import_completion then
+            table.insert(new_config.cmd, 'RoslynExtensionsOptions:EnableImportCompletion=true')
+          end
+
+          if new_config.sdk_include_prereleases then
+            table.insert(new_config.cmd, 'Sdk:IncludePrereleases=true')
+          end
+
+          if new_config.analyze_open_documents_only then
+            table.insert(new_config.cmd, 'RoslynExtensionsOptions:AnalyzeOpenDocumentsOnly=true')
+          end
+        end
+      end,
+      -- handlers = vim.tbl_extend('force', rounded_border_handlers, {
+      --   ['textDocument/definition'] = require('omnisharp_extended').handler,
+      -- }),
+    }
+  end,
 }
+
+vim.api.nvim_create_autocmd('LspAttach', {
+  callback = function(ev)
+    local neodev = require 'neodev'
+    neodev.setup {
+      library = {
+        plugins = {
+          'nvim-dap-ui',
+          types = true,
+        },
+      },
+    }
+
+    local signature = require 'lsp_signature'
+
+    signature.setup {
+      bind = true,
+      handler_opts = {
+        border = 'rounded',
+      },
+      max_width = 130,
+      wrap = true,
+      floating_window = false,
+      always_trigger = false,
+    }
+  end,
+})
 
 require('rust-tools').setup {
   server = {
-    on_attach = require('custom.config.others').custom_on_attach,
+    on_attach = custom_on_attach,
     capabilities = capabilities,
   },
+}
+require('roslyn').setup {
+  dotnet_cmd = 'dotnet', -- this is the default
+  roslyn_version = '4.8.0-3.23475.7', -- this is the default
+  on_attach = custom_on_attach,
+  capabilities = capabilities,
 }
 
 -- The line beneath this is called `modeline`. See `:help modeline`

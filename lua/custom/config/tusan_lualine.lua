@@ -1,9 +1,19 @@
 local lualine = require 'lualine'
 local icons = require 'custom.plugins.utils.icons'
+local dev_icons = require 'nvim-web-devicons'
 
 -- stylua: ignore
 local colors = {
-  bg       = '#202328',
+  iris     = '#c4a7e7',
+  pine     = '#31748f',
+  foam     = '#9ccfd8',
+  rose     = '#ebbcba',
+  gold     = '#f6c177',
+  love     = '#eb6f92',
+  subtle   = '#908caa',
+  text     = '#e0def4',
+  white    = '#ffffff',
+  bg       = '#26233a',
   fg       = '#bbc2cf',
   yellow   = '#ECBE7B',
   cyan     = '#008080',
@@ -15,18 +25,6 @@ local colors = {
   blue     = '#51afef',
   red      = '#ec5f67',
 }
-
----@return string
-local function selectionCount()
-  local isVisualMode = vim.fn.mode():find '[Vv]'
-  if not isVisualMode then
-    return ''
-  end
-  local starts = vim.fn.line 'v'
-  local ends = vim.fn.line '.'
-  local lines = starts <= ends and ends - starts + 1 or starts - ends + 1
-  return '󰉸' .. tostring(lines) .. 'L ' .. tostring(vim.fn.wordcount().visual_chars) .. 'C'
-end
 
 local conditions = {
   buffer_not_empty = function()
@@ -72,6 +70,24 @@ local config = {
   },
 }
 
+local function get_lsp_clients()
+  local bufnr = { bufnr = vim.api.nvim_get_current_buf() }
+  local clients = vim.lsp.get_clients(bufnr)
+  return clients
+end
+
+---@return boolean
+local function is_copilot_on()
+  local clients = get_lsp_clients()
+  for _, client in ipairs(clients) do
+    if string.match(client.name, 'copilot') then
+      return true
+    end
+  end
+  return false
+end
+
+---@diagnostic disable-next-line: unused-local
 local backup = string.upper(vim.fn.mode():sub(1, 1))
 -- Inserts a component in lualine_c at left section
 local function ins_left(component)
@@ -83,97 +99,81 @@ local function ins_right(component)
   table.insert(config.sections.lualine_x, component)
 end
 
--- Set up a timer to update the status line periodically
+local gui_types = {
+  bold = 'bold',
+  italic = 'italic',
+}
 
-local mode_icon = {
-  n = '󰫻',
-  i = '',
-  v = '󱂌',
-  ['^V'] = '󱂌󱎦',
-  V = '󱂌󱎦',
-  c = '󰫰',
-  no = '󰬹󰫽',
-  s = '',
-  S = '󱂌󱎦',
-  [''] = '󱂌',
-  ic = '',
-  R = '󰫿',
-  Rv = '󱂌󰫿',
-  cv = '󰫲',
-  ce = '󰫻󰫰',
-  r = '󰫿',
-  rm = '󱂌󰫿',
-  ['r?'] = '󰫰',
-  ['!'] = '󰫰',
-  t = '󰬁',
+local copilot_icons = {
+  [''] = icons.copilot.Normal,
+  ['Normal'] = icons.copilot.Normal,
+  ['Warning'] = icons.copilot.Warning,
+  ['InProgress'] = icons.copilot.Normal,
+}
+
+local copilot_colors = {
+  [''] = colors.foam,
+  ['Normal'] = colors.foam,
+  ['Warning'] = colors.love,
+  ['InProgress'] = colors.gold,
 }
 
 local mode_color = {
-  n = colors.red,
-  i = colors.green,
-  v = colors.blue,
-  [''] = colors.blue,
-  V = colors.blue,
-  c = colors.magenta,
-  no = colors.red,
-  s = colors.orange,
-  S = colors.orange,
-  [''] = colors.orange,
-  ic = colors.yellow,
-  R = colors.violet,
-  Rv = colors.violet,
-  cv = colors.red,
-  ce = colors.red,
-  r = colors.cyan,
-  rm = colors.cyan,
-  ['r?'] = colors.cyan,
-  ['!'] = colors.red,
-  t = colors.red,
+  n = colors.love,
+  i = colors.gold,
+  v = colors.iris,
+  [''] = colors.iris,
+  V = colors.iris,
+  c = colors.foam,
+  no = colors.gold,
+  s = colors.gold,
+  S = colors.gold,
+  [''] = colors.gold,
+  ic = colors.gold,
+  R = colors.pine,
+  Rv = colors.pine,
+  cv = colors.love,
+  ce = colors.love,
+  r = colors.iris,
+  rm = colors.iris,
+  ['r?'] = colors.iris,
+  ['!'] = colors.love,
+  t = colors.love,
 }
 
 local os_colors = {
-  ['unix'] = { fg = '#A349A4', gui = 'bold' },
-  ['mac'] = { fg = '#A349A4', gui = 'bold' },
-  ['dos'] = { fg = '#00A2FF', gui = 'bold' },
+  ['unix'] = { fg = '#A349A4', gui = gui_types.bold },
+  ['mac'] = { fg = '#A349A4', gui = gui_types.bold },
+  ['dos'] = { fg = '#00A2FF', gui = gui_types.bold },
 }
 
+--- Could remove this entirely
 ins_left {
   function()
     return '▊'
   end,
-  color = { fg = mode_color[vim.fn.mode()] }, -- Sets highlighting of component
-  padding = { left = 0, right = 1 },          -- We don't need space before this
+  color = function()
+    return { bg = mode_color[vim.fn.mode()], fg = mode_color[vim.fn.mode()] }
+  end, -- Sets highlighting of component
+  padding = { left = 0, right = 0 }, -- We don't need space before this
 }
 
 ins_left {
-  function()
-    return '' .. ' ' .. mode_icon[vim.fn.mode()]
-  end,
   color = function()
-    return { fg = mode_color[vim.fn.mode()] }
+    return { bg = mode_color[vim.fn.mode()], fg = colors.bg, gui = gui_types.bold }
   end,
-  padding = { right = 1 },
-}
-ins_left {
   function()
-    local isVisualMode = vim.fn.mode():find '[Vv]'
-    if not isVisualMode then
-      return ''
-    end
-    local starts = vim.fn.line 'v'
-    local ends = vim.fn.line '.'
-    local lines = starts <= ends and ends - starts + 1 or starts - ends + 1
-    return '' .. tostring(lines) .. 'L' .. '\u{A718}' .. tostring(vim.fn.wordcount().visual_chars) .. 'C'
+    return '' .. ' ' .. string.upper(vim.fn.mode())
   end,
   padding = { right = 1 },
-  color = { fg = colors.blue, gui = 'italic' },
+  separator = { left = '', right = '' },
 }
 
 ins_left {
   'branch',
   icons_enabled = true,
   icon = icons.git.Branch,
-  color = { fg = colors.magenta, gui = 'bold' },
+  color = { fg = colors.text, gui = gui_types.bold },
 }
 
 ins_left {
@@ -182,9 +182,9 @@ ins_left {
   colored = true,
   symbols = { added = icons.git.Add, modified = icons.git.Modify, removed = icons.git.Delete },
   diff_color = {
-    added = { fg = colors.green },
-    modified = { fg = colors.orange },
-    removed = { fg = colors.red },
+    added = { fg = colors.gold },
+    modified = { fg = colors.foam },
+    removed = { fg = colors.love },
   },
   cond = conditions.hide_in_width,
 }
@@ -199,9 +199,9 @@ ins_left {
     hint = icons.diagnostics.Hint .. ' ',
   },
   diagnostics_color = {
-    color_error = { fg = colors.red },
-    color_warn = { fg = colors.yellow },
-    color_info = { fg = colors.cyan },
+    color_error = { fg = colors.love },
+    color_warn = { fg = colors.gold },
+    color_info = { fg = colors.rose },
   },
 }
 
@@ -216,10 +216,6 @@ ins_left {
   file_status = true,
   newfile_status = true,
   path = 0,
-  -- fmt = function(path)
-  --   ---@diagnostic disable-next-line: param-type-mismatch
-  --   return table.concat({ vim.fs.basename(vim.fs.dirname(path)), vim.fs.basename(path) }, package.config:sub(1, 1))
-  -- end,
   symbols = {
     modified = icons.file.ModifiedFile,
     readonly = icons.file.ReadOnlyFile,
@@ -228,32 +224,84 @@ ins_left {
   },
   'filename',
   cond = conditions.buffer_not_empty,
-  color = { fg = colors.magenta, gui = 'bold' },
+  color = { fg = colors.text, gui = gui_types.bold },
 }
 
--- ins_left {
---   function()
---     return '%='
---   end,
--- }
+ins_left {
+  function()
+    return '%='
+  end,
+}
+
+ins_left {
+  function()
+    local isVisualMode = vim.fn.mode():find '[Vv]'
+    if not isVisualMode then
+      return ''
+    end
+    local starts = vim.fn.line 'v'
+    local ends = vim.fn.line '.'
+    local lines = starts <= ends and ends - starts + 1 or starts - ends + 1
+    return '' .. tostring(lines) .. 'L' .. '\u{A718}' .. tostring(vim.fn.wordcount().visual_chars) .. 'C'
+  end,
+  padding = { right = 1 },
+  color = { fg = colors.iris, gui = gui_types.italic },
+}
 
 ins_right {
   -- Lsp server name .
   function()
-    local msg = 'No Active Lsp'
-    local bufnr = { bufnr = vim.api.nvim_get_current_buf() }
-    local clients = vim.lsp.get_clients(bufnr)
+    local msg = '󰱶 nope_lsp' -- Means no lsp client attached
+    local clients = get_lsp_clients()
     if next(clients) == nil then
       return msg
     end
     for _, client in ipairs(clients) do
-      return client.name
+      if client.name ~= 'copilot' then
+        return client.name
+      end
     end
     return msg
   end,
-  icon = ' LSP:',
-  color = { fg = '#ffffff', gui = 'bold' },
+  icon = '',
+  -- Color based on the attached lsp, taken from web-devicons.
+  color = function()
+    local defaults = { fg = colors.white, gui = gui_types.bold }
+    local curr_filetype = vim.bo.filetype
+    local clients = get_lsp_clients()
+    if next(clients) == nil then
+      return defaults
+    end
+    for _, client in ipairs(clients) do
+      if client.name == 'omnisharp' then -- Since omnisharp is a special case
+        local _, color = dev_icons.get_icon_color_by_filetype(curr_filetype, { default = true })
+        return { fg = color, gui = gui_types.bold }
+      end
+      if string.match(client.name, curr_filetype) then
+        local _, color = dev_icons.get_icon_color_by_filetype(curr_filetype, { default = true })
+        return { fg = color, gui = gui_types.bold }
+      end
+    end
+    return defaults
+  end,
 }
+
+ins_right {
+  function()
+    local status = require('copilot.api').status.data
+    return copilot_icons[status.status] .. (status.message or '')
+  end,
+  padding = { left = 0, right = 1 },
+  color = function()
+    if not is_copilot_on() then
+      return
+    end
+    local status = require('copilot.api').status.data
+    return { fg = copilot_colors[status.status] or copilot_colors[''] }
+  end,
+  cond = is_copilot_on,
+}
+
 ins_right {
   'fileformat',
   icons_enabled = true, -- I think icons are cool and Tusanline has them :')
@@ -261,18 +309,21 @@ ins_right {
   color = os_colors[vim.bo.fileformat],
 }
 
-ins_right { 'location', padding = { right = 0 } }
+ins_right { 'location', padding = { right = 0 }, color = { fg = colors.subtle } }
 ins_right {
   function()
     return ' ' .. os.date '%R'
   end,
+  color = { fg = colors.subtle },
 }
 
 ins_right {
   function()
     return '▊'
   end,
-  color = { fg = colors.blue },
+  color = function()
+    return { fg = mode_color[vim.fn.mode()] }
+  end, -- Sets highlighting of component
   padding = { left = 1 },
 }
 
