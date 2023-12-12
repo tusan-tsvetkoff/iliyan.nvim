@@ -3,6 +3,11 @@ return {
   event = { 'BufWritePre' },
   cmd = { 'ConformInfo ' },
   opts = {
+    format = {
+      timeout_ms = 3000,
+      async = false, -- not recommended to change
+      quiet = false, -- not recommended to change
+    },
     log_level = vim.log.levels.TRACE,
     formatters_by_ft = {
       lua = { 'stylua' },
@@ -16,6 +21,6 @@ return {
         args = { '--write-stdout' },
       },
     },
-    format_on_save = { timeout_ms = 500, lsp_fallback = true },
+    format_on_save = { timeout_ms = 3000, lsp_fallback = true },
   },
 }

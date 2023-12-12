@@ -78,6 +78,7 @@ require('lazy').setup({
       'hrsh7th/cmp-path',
       'hrsh7th/cmp-nvim-lua',
       'hrsh7th/cmp-nvim-lsp-signature-help',
+      'hrsh7th/cmp-cmdline',
     },
     opts = function()
       return require 'custom.config.cmp'
@@ -224,11 +225,37 @@ require('which-key').register {
 require('mason').setup()
 require('mason-lspconfig').setup()
 
+local lsp_opts = {
+  diagnostics = {
+    underline = true,
+    update_in_insert = false,
+    virtual_text = {
+      spacing = 4,
+      source = 'if_many',
+      prefix = '●',
+    },
+    severity_sort = true,
+  },
+}
+
 local servers = {
   -- omnisharp = {},
   vimls = {},
   marksman = {},
-  jsonls = {},
+  jsonls = {
+    -- on_new_config = function(new_config)
+    --   new_config.settings.json.schemas = new_config.settings.json.schemas or {}
+    --   vim.list_extend(new_config.settings.json.schemas, require('schemastore').json.schemas())
+    -- end,
+    settings = {
+      json = {
+        format = {
+          enable = true,
+        },
+        validate = { enable = true },
+      },
+    },
+  },
   lua_ls = {
     single_file_support = true,
     Lua = {
@@ -244,6 +271,7 @@ local servers = {
       },
       diagnostics = {
         disable = { 'missing-fields', 'trailing-space' },
+        globals = { 'vim' },
       },
       hint = {
         enable = true,
@@ -287,6 +315,18 @@ local lspconfig = require 'lspconfig'
 mason_lspconfig.setup_handlers {
   function(server_name)
     lspconfig[server_name].setup {
+      -- diagnostics = {
+      --   underline = true,
+      --   update_in_insert = false,
+      --   virtual_text = {
+      --     spacing = 4,
+      --     source = 'if_many',
+      --   },
+      --   severity_sort = true,
+      -- },
+      -- inlay_hints = {
+      --   enabled = true,
+      -- },
       capabilities = capabilities,
       on_attach = custom_on_attach,
       settings = servers[server_name],
@@ -348,7 +388,7 @@ mason_lspconfig.setup_handlers {
 }
 
 vim.api.nvim_create_autocmd('LspAttach', {
-  callback = function(ev)
+  callback = function()
     local neodev = require 'neodev'
     neodev.setup {
       library = {
@@ -359,18 +399,23 @@ vim.api.nvim_create_autocmd('LspAttach', {
       },
     }
 
-    local signature = require 'lsp_signature'
-
-    signature.setup {
-      bind = true,
-      handler_opts = {
-        border = 'rounded',
-      },
-      max_width = 130,
-      wrap = true,
-      floating_window = false,
-      always_trigger = false,
-    }
+    -- this thing is broken/buggy with my setup
+    -- local signature = require 'lsp_signature'
+    --
+    -- signature.setup {
+    --   bind = true,
+    --   max_width = 130,
+    --   wrap = true,
+    --   hint_enable = true,
+    --   hint_inline = true,
+    --   hint_prefix = ' ',
+    --   handler_opts = {
+    --     border = 'none',
+    --   },
+    --   floating_window = true,
+    --   always_trigger = false,
+    --   transparency = 20,
+    -- }
   end,
 })
 

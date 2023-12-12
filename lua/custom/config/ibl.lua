@@ -5,14 +5,17 @@ require('ibl').setup {
     char = '▏', -- or this '' or this '' or this '▏'
     tab_char = '▏',
   },
-  scope = {
-    show_start = false,
-    show_end = false,
-  },
+  scope = { enabled = false },
   exclude = {
     filetypes = exclude_ft,
     buftypes = {
       'terminal',
+      'neotree',
+      'Trouble',
+      'trouble',
+      'notify',
+      'lazy',
+      'mason',
     },
   },
 }

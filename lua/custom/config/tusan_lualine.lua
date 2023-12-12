@@ -2,6 +2,8 @@ local lualine = require 'lualine'
 local icons = require 'custom.plugins.utils.icons'
 local dev_icons = require 'nvim-web-devicons'
 
+local tn_colors = require 'tokyonight.colors'
+
 -- stylua: ignore
 local colors = {
   iris     = '#c4a7e7',
@@ -44,10 +46,11 @@ local config = {
   options = {
     component_separators = '',
     section_separators = '',
-    theme = {
-      normal = { c = { fg = colors.fg, bg = colors.bg } },
-      inactive = { c = { fg = colors.fg, bg = colors.bg } },
-    },
+    theme = 'tokyonight',
+    -- theme = {
+    --   normal = { c = { fg = colors.fg, bg = colors.bg } },
+    --   inactive = { c = { fg = colors.fg, bg = colors.bg } },
+    -- },
   },
   sections = {
     -- these are to remove the defaults
@@ -215,7 +218,7 @@ ins_left {
 ins_left {
   file_status = true,
   newfile_status = true,
-  path = 0,
+  path = 1,
   symbols = {
     modified = icons.file.ModifiedFile,
     readonly = icons.file.ReadOnlyFile,
@@ -252,16 +255,17 @@ ins_right {
   -- Lsp server name .
   function()
     local msg = '󰱶 nope_lsp' -- Means no lsp client attached
+    local client_table = {}
     local clients = get_lsp_clients()
     if next(clients) == nil then
       return msg
     end
     for _, client in ipairs(clients) do
       if client.name ~= 'copilot' then
-        return client.name
+        table.insert(client_table, client.name)
       end
     end
-    return msg
+    return '[' .. table.concat(client_table, ', ') .. ']'
   end,
   icon = '',
   -- Color based on the attached lsp, taken from web-devicons.
