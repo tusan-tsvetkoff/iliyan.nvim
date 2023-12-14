@@ -19,74 +19,9 @@ require('lazy').setup({
   'jmederosalvarado/roslyn.nvim',
   { 'Hoffs/omnisharp-extended-lsp.nvim', lazy = true },
   -- Modern matchit implementation
-  { 'andymass/vim-matchup', event = 'BufRead' },
-  { 'tpope/vim-scriptease', cmd = { 'Scriptnames', 'Message', 'Verbose' } },
 
-  -- Asynchronous command execution
-  { 'skywind3000/asyncrun.vim', lazy = true, cmd = { 'AsyncRun' } },
   { 'cespare/vim-toml', ft = { 'toml' }, branch = 'main' },
-  {
-    'jonahgoldwastaken/copilot-status.nvim',
-    dependencies = { 'zbirenbaum/copilot.lua' },
-    lazy = true,
-    event = 'BufRead',
-  },
-  {
-    'neovim/nvim-lspconfig',
-    event = { 'BufRead', 'BufNewFile' },
-    dependencies = {
-      {
-        'williamboman/mason.nvim',
-        opts = {
-          ui = {
-            border = 'rounded',
-          },
-        },
-      },
 
-      'williamboman/mason-lspconfig.nvim', -- Useful status updates for LSP
-      {
-        'j-hui/fidget.nvim',
-        opts = {},
-      }, -- Additional lua configuration, makes nvim stuff amazing!
-      'folke/neodev.nvim',
-    },
-  },
-
-  {
-    -- Autocompletion
-    'hrsh7th/nvim-cmp',
-    event = 'InsertEnter',
-    dependencies = {
-      {
-        'L3MON4D3/LuaSnip',
-        dependencies = {
-          'rafamadriz/friendly-snippets',
-          opts = {
-            history = true,
-            updateevents = 'TextChanged,TextChangedI',
-          },
-          config = function(_, opts)
-            require('custom.config.others').luasnip(opts)
-          end,
-        },
-      },
-      'saadparwaiz1/cmp_luasnip',
-      'hrsh7th/cmp-emoji',
-      'hrsh7th/cmp-nvim-lsp',
-      'hrsh7th/cmp-buffer',
-      'hrsh7th/cmp-path',
-      'hrsh7th/cmp-nvim-lua',
-      'hrsh7th/cmp-nvim-lsp-signature-help',
-      'hrsh7th/cmp-cmdline',
-    },
-    opts = function()
-      return require 'custom.config.cmp'
-    end,
-    config = function(_, opts)
-      require('cmp').setup(opts)
-    end,
-  },
   {
     'folke/which-key.nvim',
     opts = {},
@@ -97,12 +32,12 @@ require('lazy').setup({
     opts = {
       -- See `:help gitsigns.txt`
       signs = {
-        add = { text = '▎' },
-        change = { text = '▎' },
+        add = { text = '\u{258B}' },
+        change = { text = '\u{258B}' },
         delete = { text = '' },
         topdelete = { text = '' },
-        changedelete = { text = '▎' },
-        untracked = { text = '▎' },
+        changedelete = { text = '\u{258B}' },
+        untracked = { text = '\u{258B}' },
       },
       numhl = false, -- Enable hl for line numbers
       linehl = false, -- Disable the signs column highlight
@@ -225,19 +160,6 @@ require('which-key').register {
 require('mason').setup()
 require('mason-lspconfig').setup()
 
-local lsp_opts = {
-  diagnostics = {
-    underline = true,
-    update_in_insert = false,
-    virtual_text = {
-      spacing = 4,
-      source = 'if_many',
-      prefix = '●',
-    },
-    severity_sort = true,
-  },
-}
-
 local servers = {
   -- omnisharp = {},
   vimls = {},
@@ -315,18 +237,6 @@ local lspconfig = require 'lspconfig'
 mason_lspconfig.setup_handlers {
   function(server_name)
     lspconfig[server_name].setup {
-      -- diagnostics = {
-      --   underline = true,
-      --   update_in_insert = false,
-      --   virtual_text = {
-      --     spacing = 4,
-      --     source = 'if_many',
-      --   },
-      --   severity_sort = true,
-      -- },
-      -- inlay_hints = {
-      --   enabled = true,
-      -- },
       capabilities = capabilities,
       on_attach = custom_on_attach,
       settings = servers[server_name],
@@ -398,24 +308,6 @@ vim.api.nvim_create_autocmd('LspAttach', {
         },
       },
     }
-
-    -- this thing is broken/buggy with my setup
-    -- local signature = require 'lsp_signature'
-    --
-    -- signature.setup {
-    --   bind = true,
-    --   max_width = 130,
-    --   wrap = true,
-    --   hint_enable = true,
-    --   hint_inline = true,
-    --   hint_prefix = ' ',
-    --   handler_opts = {
-    --     border = 'none',
-    --   },
-    --   floating_window = true,
-    --   always_trigger = false,
-    --   transparency = 20,
-    -- }
   end,
 })
 

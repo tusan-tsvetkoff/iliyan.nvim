@@ -1,19 +1,3 @@
--- Rose Pine
----@diagnostic disable-next-line: unused-function, unused-local
-local configure = function()
-  local rose_pine = require 'rose-pine'
-
-  rose_pine.setup {
-    variant = 'main',
-    disable_italics = true,
-    bold_vert_split = true,
-    disable_float_background = true,
-    groups = {
-      punctuation = 'muted',
-    },
-  }
-end
-
 local configure_tokyo_night = function()
   local tokyo_night = require 'tokyonight'
   tokyo_night.setup {

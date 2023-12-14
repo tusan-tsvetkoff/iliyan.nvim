@@ -1,5 +1,49 @@
+-- section_separators = { '', '' },
+-- component_separators = { '', '' },
 return {
-  -- better vim.ui
+  {
+    'nvim-lualine/lualine.nvim',
+    lazy = false,
+    dependencies = { 'nvim-tree/nvim-web-devicons' },
+    init = function()
+      vim.g.lualine_laststatus = vim.o.laststatus
+      if vim.fn.argc(-1) > 0 then
+        vim.o.statusline = ' '
+      else
+        vim.o.laststatus = 0
+      end
+    end,
+  },
+  {
+    'tzachar/highlight-undo.nvim',
+    keys = { 'u', 'U' },
+    opts = {
+      duration = 250,
+      undo = {
+        lhs = 'u',
+        map = 'silent undo',
+        opts = { desc = '󰕌 Undo' },
+      },
+      redo = {
+        lhs = 'U',
+        map = 'silent redo',
+        opts = { desc = '󰑎 Redo' },
+      },
+    },
+    config = function(_, opts)
+      require('highlight-undo').setup(opts)
+    end,
+  },
+  'folke/lsp-colors.nvim',
+  {
+    'folke/trouble.nvim',
+    dependencies = { 'nvim-tree/nvim-web-devicons' },
+    opts = {
+      position = 'right',
+      icons = true,
+      use_diagnostic_signs = true,
+    },
+  },
   {
     'stevearc/dressing.nvim',
     lazy = true,
