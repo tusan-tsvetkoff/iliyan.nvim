@@ -1,6 +1,10 @@
+local separators = { left = '', right = '' }
+local other_separators = { left = '', right = '' }
+local dash_separators = { left = '', right = '' }
 local lualine = require 'lualine'
 local dev_icons = require 'nvim-web-devicons'
 local Util = require 'custom.util'
+local wave_colors = require('kanagawa.colors').setup { theme = 'wave' }
 
 --- Could remove this entirely
 Util.lualine.ins_left {
@@ -21,14 +25,16 @@ Util.lualine.ins_left {
     return '' .. ' ' .. Util.lualine.map_mode(vim.fn.mode())
   end,
   padding = { right = 1 },
-  separator = { left = '', right = '' },
+  separator = { left = '', right = separators.right },
 }
 
 Util.lualine.ins_left {
   'branch',
   icons_enabled = true,
   icon = Util.icons.git.Branch,
-  color = { fg = Util.lualine.rosepine_colors.text, gui = Util.lualine.gui_types.bold },
+  color = { fg = Util.lualine.rosepine_colors.text, bg = wave_colors.palette.dragonBlack4, gui = Util.lualine.gui_types.bold },
+  separator = { left = other_separators.left, right = dash_separators.left },
+  padding = { left = 2, right = 1 },
 }
 
 Util.lualine.ins_left {
@@ -41,6 +47,9 @@ Util.lualine.ins_left {
     removed = { fg = Util.lualine.rosepine_colors.love },
   },
   cond = Util.lualine.conditions.hide_in_width,
+  color = { bg = wave_colors.palette.dragonBlack4 },
+  separator = { left = '', right = dash_separators.left },
+  padding = { left = 1, right = 0 },
 }
 
 Util.lualine.ins_left {
@@ -78,7 +87,7 @@ Util.lualine.ins_left {
   },
   'filename',
   cond = Util.lualine.conditions.buffer_not_empty,
-  color = { fg = Util.lualine.rosepine_colors.text, gui = Util.lualine.gui_types.bold },
+  color = { fg = wave_colors.theme.syn.variable, gui = Util.lualine.gui_types.bold },
 }
 
 Util.lualine.ins_left {
@@ -105,7 +114,7 @@ Util.lualine.ins_left {
 Util.lualine.ins_right {
   -- Lsp server name .
   function()
-    local msg = '󰱶 nope_lsp' -- Means no lsp client attached
+    local msg = '💀' -- Means no lsp client attached
     local client_table = {}
     local clients = Util.lualine.get_lsp_clients()
     if next(clients) == nil then
@@ -116,9 +125,9 @@ Util.lualine.ins_right {
         table.insert(client_table, client.name)
       end
     end
-    return '[' .. table.concat(client_table, ', ') .. ']'
+    return '⟨ ' .. table.concat(client_table, ', ') .. ' ⟩'
   end,
-  icon = '',
+  icon = '',
   -- Color based on the attached lsp, taken from web-devicons.
   color = function()
     local defaults = { fg = Util.lualine.rosepine_colors.white, gui = Util.lualine.gui_types.bold }
@@ -140,7 +149,6 @@ Util.lualine.ins_right {
     return defaults
   end,
 }
-
 Util.lualine.ins_right {
   function()
     local status = require('copilot.api').status.data

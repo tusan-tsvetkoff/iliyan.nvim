@@ -2,8 +2,17 @@ local opt = vim.opt
 
 vim.g['OmniSharp_server_path'] = 'OmniSharp'
 vim.g.markdown_recommended_style = 0
+vim.scriptencoding = 'utf-8'
 
 --------------------------------------------------------
+opt.fileencoding = 'utf-8'
+opt.encoding = 'utf-8'
+
+opt.title = true
+
+vim.cmd [[let &t_Cs = "\e[4:3m"]]
+vim.cmd [[let &t_Ce = "\e[4:0m"]]
+
 opt.hlsearch = false
 opt.incsearch = true
 
@@ -80,3 +89,4 @@ opt.colorcolumn = '80'
 opt.completeopt = { 'menuone', 'noselect' }
 
 opt.termguicolors = true
+opt.synmaxcol = 512

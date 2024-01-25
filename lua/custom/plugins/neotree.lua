@@ -1,45 +1,111 @@
+local Util = require 'custom.util'
 return {
-  'nvim-neo-tree/neo-tree.nvim',
+  'nvim-tree/nvim-tree.lua',
+  version = '*',
+  lazy = false,
   dependencies = {
-    'nvim-lua/plenary.nvim',
     'nvim-tree/nvim-web-devicons',
-    'MunifTanjim/nui.nvim',
-    {
-      's1n7ax/nvim-window-picker',
-      -- branch = 'v2.*',
-      config = function()
-        require('window-picker').setup {
-          filter_rules = {
-            include_current_win = false,
-            autoselect_one = true,
-            bo = {
-              filetype = { 'neo-tree', 'neo-tree-popup', 'notify' },
-              buftype = { 'terminal', 'quickfix' },
+  },
+  config = function()
+    require('nvim-tree').setup {
+      auto_reload_on_write = true,
+      disable_netrw = false,
+      hijack_netrw = true,
+      hijack_cursor = false,
+      hijack_unnamed_buffer_when_opening = false,
+      open_on_tab = false,
+      sort_by = 'name',
+      update_cwd = false,
+      view = {
+        width = 30,
+        side = 'left',
+        preserve_window_proportions = false,
+        number = false,
+        relativenumber = false,
+        signcolumn = 'yes',
+      },
+      renderer = {
+        indent_markers = {
+          enable = false,
+          icons = {
+            corner = '└ ',
+            edge = '│ ',
+            none = '  ',
+          },
+        },
+        icons = {
+          webdev_colors = true,
+        },
+      },
+      hijack_directories = {
+        enable = true,
+        auto_open = true,
+      },
+      update_focused_file = {
+        enable = false,
+        update_cwd = false,
+        ignore_list = {},
+      },
+      system_open = {
+        cmd = '',
+        args = {},
+      },
+      diagnostics = {
+        enable = false,
+        show_on_dirs = false,
+        icons = {
+          hint = '',
+          info = '',
+          warning = '',
+          error = '',
+        },
+      },
+      filters = {
+        dotfiles = false,
+        custom = {},
+        exclude = {},
+      },
+      git = {
+        enable = true,
+        ignore = true,
+        timeout = 400,
+      },
+      actions = {
+        use_system_clipboard = true,
+        change_dir = {
+          enable = true,
+          global = false,
+          restrict_above_cwd = false,
+        },
+        open_file = {
+          quit_on_open = false,
+          resize_window = false,
+          window_picker = {
+            enable = true,
+            chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890',
+            exclude = {
+              filetype = { 'notify', 'qf', 'diff', 'fugitive', 'fugitiveblame' },
+              buftype = { 'nofile', 'terminal', 'help' },
             },
           },
-        }
-      end,
-    },
-    -- "3rd/image.nvim", -- Optional image support in preview window: See `# Preview Mode` for more information
-  },
-  --- Thanks to @sravioli
-  init = function()
-    local keymap = vim.keymap.set
-    keymap('n', '-', ':Neotree toggle<CR>', { desc = 'Toggle NeoTree', silent = true })
-  end,
-  opts = {
-    close_if_last_window = true,
-    enable_git_status = false,
-    filesystem = {
-      bind_to_cwd = false,
-      follow_current_file = { enabled = true },
-    },
-    window = {
-      position = 'current',
-      mappings = {
-        ['-'] = 'close_window',
-        ['/'] = 'noop',
+        },
       },
-    },
-  },
+      trash = {
+        cmd = 'trash',
+        require_confirm = true,
+      },
+      log = {
+        enable = false,
+        truncate = false,
+        types = {
+          all = false,
+          config = false,
+          copy_paste = false,
+          diagnostics = false,
+          git = false,
+          profile = false,
+        },
+      },
+    }
+  end,
 }

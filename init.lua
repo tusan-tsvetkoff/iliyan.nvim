@@ -1,6 +1,8 @@
 vim.g.mapleader = ' '
 vim.g.maplocalleader = ' '
 
+local Util = require 'custom.util'
+local signs = Util.icons
 local lazypath = vim.fn.stdpath 'data' .. '/lazy/lazy.nvim'
 
 if not vim.loop.fs_stat(lazypath) then
@@ -13,12 +15,13 @@ if not vim.loop.fs_stat(lazypath) then
     lazypath,
   }
 end
-
 vim.opt.rtp:prepend(lazypath)
 require('lazy').setup({
-  'jmederosalvarado/roslyn.nvim',
+  {
+    'jmederosalvarado/roslyn.nvim',
+    lazy = true,
+  },
   { 'Hoffs/omnisharp-extended-lsp.nvim', lazy = true },
-  -- Modern matchit implementation
 
   { 'cespare/vim-toml', ft = { 'toml' }, branch = 'main' },
 
@@ -26,21 +29,20 @@ require('lazy').setup({
     'folke/which-key.nvim',
     opts = {},
   },
+
   {
-    -- Adds git related signs to the gutter, as well as utilities for managing changes
     'lewis6991/gitsigns.nvim',
     opts = {
-      -- See `:help gitsigns.txt`
       signs = {
-        add = { text = '\u{258B}' },
-        change = { text = '\u{258B}' },
-        delete = { text = '' },
-        topdelete = { text = '' },
-        changedelete = { text = '\u{258B}' },
-        untracked = { text = '\u{258B}' },
+        add = { text = signs.git.Gutter },
+        change = { text = signs.git.Gutter },
+        delete = { text = signs.git.Gutter },
+        topdelete = { text = signs.git.Gutter },
+        changedelete = { text = signs.git.Gutter },
+        untracked = { text = signs.git.Gutter },
       },
-      numhl = false, -- Enable hl for line numbers
-      linehl = false, -- Disable the signs column highlight
+      numhl = false,
+      linehl = false,
       on_attach = function(bufnr)
         vim.keymap.set('n', '<leader>hp', require('gitsigns').preview_hunk, {
           buffer = bufnr,
@@ -52,11 +54,10 @@ require('lazy').setup({
           require('scrollbar.handlers.gitsigns').setup()
         end
 
-        -- don't override the built-in and fugitive keymaps
         local gs = package.loaded.gitsigns
-        vim.keymap.set({ 'n', 'v' }, ']c', function()
+        vim.keymap.set({ 'n', 'v' }, ']h', function()
           if vim.wo.diff then
-            return ']c'
+            return ']h'
           end
           vim.schedule(function()
             gs.next_hunk()
@@ -67,9 +68,9 @@ require('lazy').setup({
           buffer = bufnr,
           desc = 'Jump to next hunk',
         })
-        vim.keymap.set({ 'n', 'v' }, '[c', function()
+        vim.keymap.set({ 'n', 'v' }, '[h', function()
           if vim.wo.diff then
-            return '[c'
+            return '[h'
           end
           vim.schedule(function()
             gs.prev_hunk()
@@ -83,10 +84,12 @@ require('lazy').setup({
       end,
     },
   },
-  {
-    'lukas-reineke/indent-blankline.nvim',
-    main = 'ibl',
-  },
+  ---- BROKEN ----
+  -- {
+  --   'lukas-reineke/indent-blankline.nvim',
+  --   main = 'ibl',
+  --   opts = {},
+  -- },
   {
     'numToStr/Comment.nvim',
     opts = {},
@@ -161,14 +164,11 @@ require('mason').setup()
 require('mason-lspconfig').setup()
 
 local servers = {
-  -- omnisharp = {},
+  pylsp = {},
+  clangd = {},
   vimls = {},
   marksman = {},
   jsonls = {
-    -- on_new_config = function(new_config)
-    --   new_config.settings.json.schemas = new_config.settings.json.schemas or {}
-    --   vim.list_extend(new_config.settings.json.schemas, require('schemastore').json.schemas())
-    -- end,
     settings = {
       json = {
         format = {
@@ -215,17 +215,18 @@ local servers = {
   },
 }
 
-require('barbecue').setup {}
+local has_bbq, _ = pcall(require, 'barbecue')
 
--- Setup neovim lua configuration
+if has_bbq then
+  require('barbecue').setup {}
+end
+
 require('neodev').setup {}
 local custom_on_attach = require('custom.config.others').custom_on_attach
 
--- nvim-cmp supports additional completion capabilities, so broadcast that to servers
 local capabilities = vim.lsp.protocol.make_client_capabilities()
 capabilities = require('cmp_nvim_lsp').default_capabilities(capabilities)
 
--- Ensure the servers above are installed
 local mason_lspconfig = require 'mason-lspconfig'
 
 mason_lspconfig.setup {
@@ -297,19 +298,43 @@ mason_lspconfig.setup_handlers {
   end,
 }
 
-vim.api.nvim_create_autocmd('LspAttach', {
-  callback = function()
-    local neodev = require 'neodev'
-    neodev.setup {
-      library = {
-        plugins = {
-          'nvim-dap-ui',
-          types = true,
-        },
-      },
-    }
-  end,
-})
+local conf_signs = {
+  { name = 'DiagnosticsSignError', text = signs.diagnostics.Error },
+  { name = 'DiagnosticsSignWarning', text = signs.diagnostics.Warn },
+  { name = 'DiagnosticsSignInformation', text = signs.diagnostics.Info },
+  { name = 'DiagnosticsSignHint', text = signs.diagnostics.Hint },
+}
+
+for type, sign in pairs(signs.diagnostics) do
+  type = 'DiagnosticSign' .. type
+  vim.fn.sign_define(type, { text = sign, texthl = type, numhl = '' })
+end
+
+local diagnostic_config = {
+  virtual_text = true, -- appears after the line
+  virtual_lines = false, -- appears under the line
+  signs = {
+    active = conf_signs,
+  },
+  flags = {
+    debounce_text_changes = 200,
+  },
+  update_in_insert = true,
+  underline = true,
+  severity_sort = true,
+  float = {
+    focus = false,
+    focusable = false,
+    style = 'minimal',
+    border = 'shadow',
+    source = 'always',
+    header = '',
+    prefix = '',
+  },
+}
+
+lspconfig.util.default_config = vim.tbl_deep_extend('force', lspconfig.util.default_config, diagnostic_config)
+vim.diagnostic.config(diagnostic_config)
 
 require('rust-tools').setup {
   server = {

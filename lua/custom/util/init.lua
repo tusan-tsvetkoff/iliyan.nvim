@@ -1,6 +1,8 @@
 ---@class custom.util
 ---@field icons custom.util.icons
 ---@field lualine custom.util.lualine
+---@field root custom.util.root
+---@field lsp custom.util.lsp
 local M = {}
 
 setmetatable(M, {

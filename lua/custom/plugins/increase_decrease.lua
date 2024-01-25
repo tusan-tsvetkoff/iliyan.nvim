@@ -1,4 +1,3 @@
--- from @folke
 return {
   'monaqa/dial.nvim',
   keys = {
