@@ -19,73 +19,9 @@ require('lazy').setup({
   'jmederosalvarado/roslyn.nvim',
   { 'Hoffs/omnisharp-extended-lsp.nvim', lazy = true },
   -- Modern matchit implementation
-  { 'andymass/vim-matchup', event = 'BufRead' },
-  { 'tpope/vim-scriptease', cmd = { 'Scriptnames', 'Message', 'Verbose' } },
 
-  -- Asynchronous command execution
-  { 'skywind3000/asyncrun.vim', lazy = true, cmd = { 'AsyncRun' } },
   { 'cespare/vim-toml', ft = { 'toml' }, branch = 'main' },
-  {
-    'jonahgoldwastaken/copilot-status.nvim',
-    dependencies = { 'zbirenbaum/copilot.lua' },
-    lazy = true,
-    event = 'BufRead',
-  },
-  {
-    'neovim/nvim-lspconfig',
-    event = { 'BufRead', 'BufNewFile' },
-    dependencies = {
-      {
-        'williamboman/mason.nvim',
-        opts = {
-          ui = {
-            border = 'rounded',
-          },
-        },
-      },
 
-      'williamboman/mason-lspconfig.nvim', -- Useful status updates for LSP
-      {
-        'j-hui/fidget.nvim',
-        opts = {},
-      }, -- Additional lua configuration, makes nvim stuff amazing!
-      'folke/neodev.nvim',
-    },
-  },
-
-  {
-    -- Autocompletion
-    'hrsh7th/nvim-cmp',
-    event = 'InsertEnter',
-    dependencies = {
-      {
-        'L3MON4D3/LuaSnip',
-        dependencies = {
-          'rafamadriz/friendly-snippets',
-          opts = {
-            history = true,
-            updateevents = 'TextChanged,TextChangedI',
-          },
-          config = function(_, opts)
-            require('custom.config.others').luasnip(opts)
-          end,
-        },
-      },
-      'saadparwaiz1/cmp_luasnip',
-      'hrsh7th/cmp-emoji',
-      'hrsh7th/cmp-nvim-lsp',
-      'hrsh7th/cmp-buffer',
-      'hrsh7th/cmp-path',
-      'hrsh7th/cmp-nvim-lua',
-      'hrsh7th/cmp-nvim-lsp-signature-help',
-    },
-    opts = function()
-      return require 'custom.config.cmp'
-    end,
-    config = function(_, opts)
-      require('cmp').setup(opts)
-    end,
-  },
   {
     'folke/which-key.nvim',
     opts = {},
@@ -96,12 +32,12 @@ require('lazy').setup({
     opts = {
       -- See `:help gitsigns.txt`
       signs = {
-        add = { text = '▎' },
-        change = { text = '▎' },
+        add = { text = '\u{258B}' },
+        change = { text = '\u{258B}' },
         delete = { text = '' },
         topdelete = { text = '' },
-        changedelete = { text = '▎' },
-        untracked = { text = '▎' },
+        changedelete = { text = '\u{258B}' },
+        untracked = { text = '\u{258B}' },
       },
       numhl = false, -- Enable hl for line numbers
       linehl = false, -- Disable the signs column highlight
@@ -228,7 +164,20 @@ local servers = {
   -- omnisharp = {},
   vimls = {},
   marksman = {},
-  jsonls = {},
+  jsonls = {
+    -- on_new_config = function(new_config)
+    --   new_config.settings.json.schemas = new_config.settings.json.schemas or {}
+    --   vim.list_extend(new_config.settings.json.schemas, require('schemastore').json.schemas())
+    -- end,
+    settings = {
+      json = {
+        format = {
+          enable = true,
+        },
+        validate = { enable = true },
+      },
+    },
+  },
   lua_ls = {
     single_file_support = true,
     Lua = {
@@ -244,6 +193,7 @@ local servers = {
       },
       diagnostics = {
         disable = { 'missing-fields', 'trailing-space' },
+        globals = { 'vim' },
       },
       hint = {
         enable = true,
@@ -348,7 +298,7 @@ mason_lspconfig.setup_handlers {
 }
 
 vim.api.nvim_create_autocmd('LspAttach', {
-  callback = function(ev)
+  callback = function()
     local neodev = require 'neodev'
     neodev.setup {
       library = {
@@ -357,19 +307,6 @@ vim.api.nvim_create_autocmd('LspAttach', {
           types = true,
         },
       },
-    }
-
-    local signature = require 'lsp_signature'
-
-    signature.setup {
-      bind = true,
-      handler_opts = {
-        border = 'rounded',
-      },
-      max_width = 130,
-      wrap = true,
-      floating_window = false,
-      always_trigger = false,
     }
   end,
 })

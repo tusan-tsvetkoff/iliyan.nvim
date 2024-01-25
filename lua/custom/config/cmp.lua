@@ -52,24 +52,30 @@ local format_style = {
   end,
 }
 
-local function border(hl_name)
-  return {
-    { '╭', hl_name },
-    { '─', hl_name },
-    { '╮', hl_name },
-    { '│', hl_name },
-    { '╯', hl_name },
-    { '─', hl_name },
-    { '╰', hl_name },
-    { '│', hl_name },
-  }
-end
+-- local function border(hl_name)
+--   return {
+--     { '╭', hl_name },
+--     { '─', hl_name },
+--     { '╮', hl_name },
+--     { '│', hl_name },
+--     { '╯', hl_name },
+--     { '─', hl_name },
+--     { '╰', hl_name },
+--     { '│', hl_name },
+--   }
+-- end
 
 local options = {
+  vim.api.nvim_set_hl(0, 'CmpGhostText', { link = 'Comment', default = true }),
   snippet = {
     expand = function(args)
       luasnip.lsp_expand(args.body)
     end,
+  },
+  experimental = {
+    ghost_text = {
+      hl_group = 'CmpGhostText',
+    },
   },
   sorting = {
     priority_weight = 2,
@@ -89,19 +95,39 @@ local options = {
   },
 
   completion = {
-    completeopt = 'menu,menuone',
+    completeopt = 'menu,menuone,noinsert',
   },
 
-  window = {
-    completion = {
-      scrollbar = false,
-      border = border 'CmpDscBorder',
+  -- window = {
+  --   completion = {
+  --     scrollbar = false,
+  --     border = border 'CmpDscBorder',
+  --   },
+  --   documentation = {
+  --     border = border 'CmpDscBorder',
+  --     winhighlight = 'Normal:CmpDoc',
+  --   },
+  -- },
+
+  -- `/` cmdline setup.
+  cmp.setup.cmdline('/', {
+    mapping = cmp.mapping.preset.cmdline(),
+    sources = {
+      { name = 'buffer' },
     },
-    documentation = {
-      border = border 'CmpDscBorder',
-      winhighlight = 'Normal:CmpDoc',
-    },
-  },
+  }),
+
+  -- `:` cmdline setup.
+  cmp.setup.cmdline(':', {
+    mapping = cmp.mapping.preset.cmdline(),
+    sources = cmp.config.sources({
+      { name = 'path' },
+    }, {
+      { name = 'cmdline', option = {
+        ignore_cmds = { 'w' },
+      } },
+    }),
+  }),
 
   sources = {
     {
@@ -109,7 +135,7 @@ local options = {
     },
     {
       name = 'copilot',
-      priority = 1,
+      priority = 100,
       group_index = 1,
     },
     {
