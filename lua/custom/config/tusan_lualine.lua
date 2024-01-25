@@ -1,239 +1,102 @@
+local separators = { left = '', right = '' }
+local other_separators = { left = '', right = '' }
+local dash_separators = { left = '', right = '' }
 local lualine = require 'lualine'
-local icons = require 'custom.plugins.utils.icons'
 local dev_icons = require 'nvim-web-devicons'
-
--- stylua: ignore
-local colors = {
-  iris     = '#c4a7e7',
-  pine     = '#31748f',
-  foam     = '#9ccfd8',
-  rose     = '#ebbcba',
-  gold     = '#f6c177',
-  love     = '#eb6f92',
-  subtle   = '#908caa',
-  text     = '#e0def4',
-  white    = '#ffffff',
-  bg       = '#26233a',
-  fg       = '#bbc2cf',
-  yellow   = '#ECBE7B',
-  cyan     = '#008080',
-  darkblue = '#081633',
-  green    = '#98be65',
-  orange   = '#FF8800',
-  violet   = '#a9a1e1',
-  magenta  = '#c678dd',
-  blue     = '#51afef',
-  red      = '#ec5f67',
-}
-
-local conditions = {
-  buffer_not_empty = function()
-    return vim.fn.empty(vim.fn.expand '%:t') ~= 1
-  end,
-  hide_in_width = function()
-    return vim.fn.winwidth(0) > 80
-  end,
-  check_git_workspace = function()
-    local filepath = vim.fn.expand '%:p:h'
-    local gitdir = vim.fn.finddir('.git', filepath .. ';')
-    return gitdir and #gitdir > 0 and #gitdir < #filepath
-  end,
-}
--- Config
-local config = {
-  options = {
-    component_separators = '',
-    section_separators = '',
-    theme = {
-      normal = { c = { fg = colors.fg, bg = colors.bg } },
-      inactive = { c = { fg = colors.fg, bg = colors.bg } },
-    },
-  },
-  sections = {
-    -- these are to remove the defaults
-    lualine_a = {},
-    lualine_b = {},
-    lualine_y = {},
-    lualine_z = {},
-    -- These will be filled later
-    lualine_c = {},
-    lualine_x = {},
-  },
-  inactive_sections = {
-    -- these are to remove the defaults
-    lualine_a = {},
-    lualine_b = {},
-    lualine_y = {},
-    lualine_z = {},
-    lualine_c = {},
-    lualine_x = {},
-  },
-}
-
-local function get_lsp_clients()
-  local bufnr = { bufnr = vim.api.nvim_get_current_buf() }
-  local clients = vim.lsp.get_clients(bufnr)
-  return clients
-end
-
----@return boolean
-local function is_copilot_on()
-  local clients = get_lsp_clients()
-  for _, client in ipairs(clients) do
-    if string.match(client.name, 'copilot') then
-      return true
-    end
-  end
-  return false
-end
-
----@diagnostic disable-next-line: unused-local
-local backup = string.upper(vim.fn.mode():sub(1, 1))
--- Inserts a component in lualine_c at left section
-local function ins_left(component)
-  table.insert(config.sections.lualine_c, component)
-end
-
--- Inserts a component in lualine_x at right section
-local function ins_right(component)
-  table.insert(config.sections.lualine_x, component)
-end
-
-local gui_types = {
-  bold = 'bold',
-  italic = 'italic',
-}
-
-local copilot_icons = {
-  [''] = icons.copilot.Normal,
-  ['Normal'] = icons.copilot.Normal,
-  ['Warning'] = icons.copilot.Warning,
-  ['InProgress'] = icons.copilot.Normal,
-}
-
-local copilot_colors = {
-  [''] = colors.foam,
-  ['Normal'] = colors.foam,
-  ['Warning'] = colors.love,
-  ['InProgress'] = colors.gold,
-}
-
-local mode_color = {
-  n = colors.love,
-  i = colors.gold,
-  v = colors.iris,
-  [''] = colors.iris,
-  V = colors.iris,
-  c = colors.foam,
-  no = colors.gold,
-  s = colors.gold,
-  S = colors.gold,
-  [''] = colors.gold,
-  ic = colors.gold,
-  R = colors.pine,
-  Rv = colors.pine,
-  cv = colors.love,
-  ce = colors.love,
-  r = colors.iris,
-  rm = colors.iris,
-  ['r?'] = colors.iris,
-  ['!'] = colors.love,
-  t = colors.love,
-}
-
-local os_colors = {
-  ['unix'] = { fg = '#A349A4', gui = gui_types.bold },
-  ['mac'] = { fg = '#A349A4', gui = gui_types.bold },
-  ['dos'] = { fg = '#00A2FF', gui = gui_types.bold },
-}
+local Util = require 'custom.util'
+local wave_colors = require('kanagawa.colors').setup { theme = 'wave' }
 
 --- Could remove this entirely
-ins_left {
+Util.lualine.ins_left {
   function()
     return '▊'
   end,
   color = function()
-    return { bg = mode_color[vim.fn.mode()], fg = mode_color[vim.fn.mode()] }
+    return { bg = Util.lualine.mode_color[vim.fn.mode()], fg = Util.lualine.mode_color[vim.fn.mode()] }
   end, -- Sets highlighting of component
   padding = { left = 0, right = 0 }, -- We don't need space before this
 }
 
-ins_left {
+Util.lualine.ins_left {
   color = function()
-    return { bg = mode_color[vim.fn.mode()], fg = colors.bg, gui = gui_types.bold }
+    return { bg = Util.lualine.mode_color[vim.fn.mode()], fg = Util.lualine.rosepine_colors.bg, gui = Util.lualine.gui_types.bold }
   end,
   function()
-    return '' .. ' ' .. string.upper(vim.fn.mode())
+    return '' .. ' ' .. Util.lualine.map_mode(vim.fn.mode())
   end,
   padding = { right = 1 },
-  separator = { left = '', right = '' },
+  separator = { left = '', right = separators.right },
 }
 
-ins_left {
+Util.lualine.ins_left {
   'branch',
   icons_enabled = true,
-  icon = icons.git.Branch,
-  color = { fg = colors.text, gui = gui_types.bold },
+  icon = Util.icons.git.Branch,
+  color = { fg = Util.lualine.rosepine_colors.text, bg = wave_colors.palette.dragonBlack4, gui = Util.lualine.gui_types.bold },
+  separator = { left = other_separators.left, right = dash_separators.left },
+  padding = { left = 2, right = 1 },
 }
 
-ins_left {
+Util.lualine.ins_left {
   'diff',
-  -- Is it me or the symbol for modified us really weird
   colored = true,
-  symbols = { added = icons.git.Add, modified = icons.git.Modify, removed = icons.git.Delete },
+  symbols = { added = Util.icons.git.Add, modified = Util.icons.git.Modify, removed = Util.icons.git.Delete },
   diff_color = {
-    added = { fg = colors.gold },
-    modified = { fg = colors.foam },
-    removed = { fg = colors.love },
+    added = { fg = Util.lualine.rosepine_colors.gold },
+    modified = { fg = Util.lualine.rosepine_colors.foam },
+    removed = { fg = Util.lualine.rosepine_colors.love },
   },
-  cond = conditions.hide_in_width,
+  cond = Util.lualine.conditions.hide_in_width,
+  color = { bg = wave_colors.palette.dragonBlack4 },
+  separator = { left = '', right = dash_separators.left },
+  padding = { left = 1, right = 0 },
 }
 
-ins_left {
+Util.lualine.ins_left {
   'diagnostics',
   sources = { 'nvim_diagnostic' },
   symbols = {
-    error = icons.diagnostics.Error .. ' ',
-    warn = icons.diagnostics.Warn .. ' ',
-    info = icons.diagnostics.Info .. ' ',
-    hint = icons.diagnostics.Hint .. ' ',
+    error = Util.icons.diagnostics.Error .. ' ',
+    warn = Util.icons.diagnostics.Warn .. ' ',
+    info = Util.icons.diagnostics.Info .. ' ',
+    hint = Util.icons.diagnostics.Hint .. ' ',
   },
   diagnostics_color = {
-    color_error = { fg = colors.love },
-    color_warn = { fg = colors.gold },
-    color_info = { fg = colors.rose },
+    color_error = { fg = Util.lualine.rosepine_colors.love },
+    color_warn = { fg = Util.lualine.rosepine_colors.gold },
+    color_info = { fg = Util.lualine.rosepine_colors.rose },
   },
 }
 
-ins_left {
+Util.lualine.ins_left {
   'filetype',
   colored = true,
   icon_only = true,
   padding = { left = 1, right = 0 },
 }
 
-ins_left {
+Util.lualine.ins_left {
   file_status = true,
   newfile_status = true,
-  path = 0,
+  path = 1,
   symbols = {
-    modified = icons.file.ModifiedFile,
-    readonly = icons.file.ReadOnlyFile,
-    unnamed = icons.file.UnNamedFile,
-    newfile = icons.file.NewFile,
+    modified = Util.icons.file.ModifiedFile,
+    readonly = Util.icons.file.ReadOnlyFile,
+    unnamed = Util.icons.file.UnNamedFile,
+    newfile = Util.icons.file.NewFile,
   },
   'filename',
-  cond = conditions.buffer_not_empty,
-  color = { fg = colors.text, gui = gui_types.bold },
+  cond = Util.lualine.conditions.buffer_not_empty,
+  color = { fg = wave_colors.theme.syn.variable, gui = Util.lualine.gui_types.bold },
 }
 
-ins_left {
+Util.lualine.ins_left {
   function()
     return '%='
   end,
 }
 
-ins_left {
+Util.lualine.ins_left {
   function()
     local isVisualMode = vim.fn.mode():find '[Vv]'
     if not isVisualMode then
@@ -245,87 +108,87 @@ ins_left {
     return '' .. tostring(lines) .. 'L' .. '\u{A718}' .. tostring(vim.fn.wordcount().visual_chars) .. 'C'
   end,
   padding = { right = 1 },
-  color = { fg = colors.iris, gui = gui_types.italic },
+  color = { fg = Util.lualine.rosepine_colors.iris, gui = Util.lualine.gui_types.italic },
 }
 
-ins_right {
+Util.lualine.ins_right {
   -- Lsp server name .
   function()
-    local msg = '󰱶 nope_lsp' -- Means no lsp client attached
-    local clients = get_lsp_clients()
+    local msg = '💀' -- Means no lsp client attached
+    local client_table = {}
+    local clients = Util.lualine.get_lsp_clients()
     if next(clients) == nil then
       return msg
     end
     for _, client in ipairs(clients) do
       if client.name ~= 'copilot' then
-        return client.name
+        table.insert(client_table, client.name)
       end
     end
-    return msg
+    return '⟨ ' .. table.concat(client_table, ', ') .. ' ⟩'
   end,
-  icon = '',
+  icon = '',
   -- Color based on the attached lsp, taken from web-devicons.
   color = function()
-    local defaults = { fg = colors.white, gui = gui_types.bold }
+    local defaults = { fg = Util.lualine.rosepine_colors.white, gui = Util.lualine.gui_types.bold }
     local curr_filetype = vim.bo.filetype
-    local clients = get_lsp_clients()
+    local clients = Util.lualine.get_lsp_clients()
     if next(clients) == nil then
       return defaults
     end
     for _, client in ipairs(clients) do
       if client.name == 'omnisharp' then -- Since omnisharp is a special case
         local _, color = dev_icons.get_icon_color_by_filetype(curr_filetype, { default = true })
-        return { fg = color, gui = gui_types.bold }
+        return { fg = color, gui = Util.lualine.gui_types.bold }
       end
       if string.match(client.name, curr_filetype) then
         local _, color = dev_icons.get_icon_color_by_filetype(curr_filetype, { default = true })
-        return { fg = color, gui = gui_types.bold }
+        return { fg = color, gui = Util.lualine.gui_types.bold }
       end
     end
     return defaults
   end,
 }
-
-ins_right {
+Util.lualine.ins_right {
   function()
     local status = require('copilot.api').status.data
-    return copilot_icons[status.status] .. (status.message or '')
+    return Util.lualine.copilot_icons[status.status] .. (status.message or '')
   end,
   padding = { left = 0, right = 1 },
   color = function()
-    if not is_copilot_on() then
+    if not Util.lualine.is_copilot_on() then
       return
     end
     local status = require('copilot.api').status.data
-    return { fg = copilot_colors[status.status] or copilot_colors[''] }
+    return { fg = Util.lualine.copilot_colors[status.status] or Util.lualine.copilot_colors[''] }
   end,
-  cond = is_copilot_on,
+  cond = Util.lualine.is_copilot_on,
 }
 
-ins_right {
+Util.lualine.ins_right {
   'fileformat',
   icons_enabled = true, -- I think icons are cool and Tusanline has them :')
   symbols = { dos = '', unix = '', mac = '' },
-  color = os_colors[vim.bo.fileformat],
+  color = Util.lualine.os_colors[vim.bo.fileformat],
 }
 
-ins_right { 'location', padding = { right = 0 }, color = { fg = colors.subtle } }
-ins_right {
+Util.lualine.ins_right { 'location', padding = { right = 0 }, color = { fg = Util.lualine.rosepine_colors.subtle } }
+Util.lualine.ins_right {
   function()
     return ' ' .. os.date '%R'
   end,
-  color = { fg = colors.subtle },
+  color = { fg = Util.lualine.rosepine_colors.subtle },
 }
 
-ins_right {
+Util.lualine.ins_right {
   function()
     return '▊'
   end,
   color = function()
-    return { fg = mode_color[vim.fn.mode()] }
+    return { fg = Util.lualine.mode_color[vim.fn.mode()] }
   end, -- Sets highlighting of component
   padding = { left = 1 },
 }
 
 -- Now don't forget to initialize lualine
-lualine.setup(config)
+lualine.setup(Util.lualine.config)

@@ -52,24 +52,30 @@ local format_style = {
   end,
 }
 
-local function border(hl_name)
-  return {
-    { '╭', hl_name },
-    { '─', hl_name },
-    { '╮', hl_name },
-    { '│', hl_name },
-    { '╯', hl_name },
-    { '─', hl_name },
-    { '╰', hl_name },
-    { '│', hl_name },
-  }
-end
+-- local function border(hl_name)
+--   return {
+--     { '╭', hl_name },
+--     { '─', hl_name },
+--     { '╮', hl_name },
+--     { '│', hl_name },
+--     { '╯', hl_name },
+--     { '─', hl_name },
+--     { '╰', hl_name },
+--     { '│', hl_name },
+--   }
+-- end
 
 local options = {
+  vim.api.nvim_set_hl(0, 'CmpGhostText', { link = 'Comment', default = true }),
   snippet = {
     expand = function(args)
       luasnip.lsp_expand(args.body)
     end,
+  },
+  experimental = {
+    ghost_text = {
+      hl_group = 'CmpGhostText',
+    },
   },
   sorting = {
     priority_weight = 2,
@@ -89,27 +95,27 @@ local options = {
   },
 
   completion = {
-    completeopt = 'menu,menuone',
+    completeopt = 'menu,menuone,noinsert',
   },
 
   window = {
-    completion = {
-      scrollbar = false,
-      border = border 'CmpDscBorder',
+    completion = cmp.config.window.bordered {
+      winhighlight = 'Normal:Normal,FloatBorder:LspBorderBG,CursorLine:PmenuSel,Search:None',
     },
-    documentation = {
-      border = border 'CmpDscBorder',
-      winhighlight = 'Normal:CmpDoc',
+    documentation = cmp.config.window.bordered {
+      winhighlight = 'Normal:Normal,FloatBorder:LspBorderBG,CursorLine:PmenuSel,Search:None',
     },
   },
-
+  view = {
+    entries = 'bordered',
+  },
   sources = {
     {
       name = 'nvim_lsp_signature_help',
     },
     {
       name = 'copilot',
-      priority = 1,
+      priority = 100,
       group_index = 1,
     },
     {

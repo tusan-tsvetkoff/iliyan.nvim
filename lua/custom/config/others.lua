@@ -14,55 +14,23 @@ M.custom_on_attach = function(client, bufnr)
       desc = desc,
     })
 
-    local api = vim.api
-    local diagnostic = vim.diagnostic
-    local lsp = vim.lsp
-
-    local _border = 'rounded'
-
     vim.cmd [[
       hi! link LspReferenceRead Visual
       hi! link LspReferenceText Visual
       hi! link LspReferenceWrite Visual
     ]]
 
-    vim.cmd [[
-        hi! link FloatBorder Normal
-      ]]
+    local border = {
+      border = 'shadow',
+    }
 
-    local gid = api.nvim_create_augroup('lsp_document_highlight', { clear = true })
-    api.nvim_create_autocmd('CursorHold', {
-      group = gid,
-      buffer = bufnr,
-      callback = function()
-        lsp.buf.document_highlight()
-      end,
-    })
-
-    api.nvim_create_autocmd('CursorMoved', {
-      group = gid,
-      buffer = bufnr,
-      callback = function()
-        lsp.buf.clear_references()
-      end,
-    })
+    vim.lsp.handlers['textDocument/signatureHelp'] = vim.lsp.with(vim.lsp.handlers.hover, border)
+    vim.lsp.handlers['textDocument/hover'] = vim.lsp.with(vim.lsp.handlers.hover, border)
 
     if vim.g.logging_level == 'debug' then
       local msg = string.format('Language server %s started!', client.name)
       vim.notify(msg, vim.log.levels.DEBUG, { title = 'Nvim-config' })
     end
-
-    vim.lsp.handlers['textDocument/hover'] = vim.lsp.with(vim.lsp.handlers.hover, {
-      border = _border,
-    })
-
-    vim.lsp.handlers['textDocument/signatureHelp'] = vim.lsp.with(vim.lsp.handlers.signature_help, {
-      border = _border,
-    })
-
-    require('lspconfig.ui.windows').default_options = {
-      border = _border,
-    }
   end
 
   nmap('<leader>rn', vim.lsp.buf.rename, '[R]e[n]ame')

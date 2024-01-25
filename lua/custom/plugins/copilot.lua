@@ -1,5 +1,11 @@
 return {
   {
+    'jonahgoldwastaken/copilot-status.nvim',
+    dependencies = { 'zbirenbaum/copilot.lua' },
+    lazy = true,
+    event = 'BufRead',
+  },
+  {
     'zbirenbaum/copilot.lua',
     cmd = 'Copilot',
     build = ':Copilot auth',

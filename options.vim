@@ -1,8 +1,5 @@
 scriptencoding utf-8
 
-set pumheight=10  " Maximum number of items to show in popup menu
-set pumblend=10  " pseudo transparency for completion menu
-
 set matchpairs+=<:>,「:」,『:』,【:】,“:”,‘:’,《:》
 
 " highlight FloatBorder  ctermfg=NONE ctermbg=NONE cterm=NONE

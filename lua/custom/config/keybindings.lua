@@ -8,6 +8,8 @@ local u = require 'custom.config.utils'
 keymap.set('n', '<leader>p', 'm`o<ESC>p``', { desc = 'Paste below current line' })
 keymap.set('n', '<leader>P', 'm`O<ESC>p``', { desc = 'Paste above current line' })
 
+-- vim.api.nvim_set_keymap('n', '<leader>do', '<cmd>lua vim.diagnostic.open_float()<CR>', { noremap = true, silent = true })
+
 keymap.set('n', '<leader>mp', function()
   local peek = require 'peek'
 
@@ -25,6 +27,12 @@ end, { desc = 'Preview Markdown' })
 
 -- Mouse support
 -- keymap.set('n', '<MouseMove>', require('hover').hover_mouse, { desc = 'hover.nvim (mouse)' })
+
+-- Nvim-tree
+keymap.set('n', '<leader>e', require('nvim-tree.api').tree.toggle, {
+  silent = true,
+  desc = 'Toggle Nvim-Tree',
+})
 
 -- SSR Maps
 keymap.set({ 'n', 'x' }, '<leader>sr', function()
@@ -49,8 +57,8 @@ keymap.set('n', '<leader>rr', ':IncRename ')
 -- key.set("n", "<leader>Y", [["+Y]])
 
 -- Keys are too damn hard to press
-keymap.set('n', '<leader>bl', '^', { desc = 'Move to beginning of line' })
-keymap.set('n', '<leader>el', '$', { desc = 'Move to beginning of line' })
+-- keymap.set('n', '<leader>bl', '^', { desc = 'Move to [b]eginning of [l]ine' })
+-- keymap.set('n', '<leader>el', '$', { desc = 'Move to [e]ending of [l]ine' })
 
 keymap.set('n', '~', '~h', { desc = '~ without moving)' })
 
@@ -84,7 +92,7 @@ vim.keymap.set({ 'n', 'v' }, '<Space>', '<Nop>', { silent = true })
 -- Diagnostic keymaps
 vim.keymap.set('n', '[d', vim.diagnostic.goto_prev, { desc = 'Go to previous diagnostic message' })
 vim.keymap.set('n', ']d', vim.diagnostic.goto_next, { desc = 'Go to next diagnostic message' })
-vim.keymap.set('n', '<leader>e', vim.diagnostic.open_float, { desc = 'Open floating diagnostic message' })
+vim.keymap.set('n', '<leader>do', vim.diagnostic.open_float, { desc = 'Open floating diagnostic message' })
 vim.keymap.set('n', '<leader>q', vim.diagnostic.setloclist, { desc = 'Open diagnostics list' })
 
 -- Neotree
@@ -123,4 +131,24 @@ vim.keymap.set('n', '<C-n>', function()
 end)
 vim.keymap.set('n', '<C-s>', function()
   harpoon:list():select(4)
+end)
+
+-- Trouble
+vim.keymap.set('n', '<leader>xx', function()
+  require('trouble').toggle()
+end)
+vim.keymap.set('n', '<leader>xw', function()
+  require('trouble').toggle 'workspace_diagnostics'
+end)
+vim.keymap.set('n', '<leader>xd', function()
+  require('trouble').toggle 'document_diagnostics'
+end)
+vim.keymap.set('n', '<leader>xq', function()
+  require('trouble').toggle 'quickfix'
+end)
+vim.keymap.set('n', '<leader>xl', function()
+  require('trouble').toggle 'loclist'
+end)
+vim.keymap.set('n', 'gR', function()
+  require('trouble').toggle 'lsp_references'
 end)

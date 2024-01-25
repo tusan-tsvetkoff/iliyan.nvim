@@ -1,12 +1,33 @@
 local opt = vim.opt
-vim.g.loaded_netrw = 1
-vim.g.loaded_netrwPlugin = 1
-vim.g.loaded_matchparen = 1
 
 vim.g['OmniSharp_server_path'] = 'OmniSharp'
+vim.g.markdown_recommended_style = 0
+vim.scriptencoding = 'utf-8'
+
 --------------------------------------------------------
+opt.fileencoding = 'utf-8'
+opt.encoding = 'utf-8'
+
+opt.title = true
+
+vim.cmd [[let &t_Cs = "\e[4:3m"]]
+vim.cmd [[let &t_Ce = "\e[4:0m"]]
+
 opt.hlsearch = false
 opt.incsearch = true
+
+-- Do not show mode
+opt.showmode = false
+
+-- Pseudo transparency for floating window
+opt.winblend = 10
+
+-- Pseudo transparency for completion menu
+opt.pumblend = 10
+
+-- Fix markdown indentation settings
+
+opt.smoothscroll = true
 
 opt.showmatch = true
 opt.errorbells = false
@@ -68,3 +89,4 @@ opt.colorcolumn = '80'
 opt.completeopt = { 'menuone', 'noselect' }
 
 opt.termguicolors = true
+opt.synmaxcol = 512

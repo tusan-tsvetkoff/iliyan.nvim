@@ -1,8 +1,7 @@
 return {
-  "petertriho/nvim-scrollbar",
+  'petertriho/nvim-scrollbar',
   config = function()
-    local scrollbar = require("scrollbar")
-
-    scrollbar.setup({})
+    local scrollbar = require 'scrollbar'
+    scrollbar.setup {}
   end,
 }
