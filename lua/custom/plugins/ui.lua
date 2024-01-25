@@ -1,5 +1,3 @@
--- section_separators = { '', '' },
--- component_separators = { '', '' },
 return {
   {
     'nvim-lualine/lualine.nvim',
@@ -44,6 +42,7 @@ return {
       use_diagnostic_signs = true,
     },
   },
+  -- { 'lukas-reineke/indent-blankline.nvim', main = 'ibl', opts = {} },
   {
     'stevearc/dressing.nvim',
     lazy = true,

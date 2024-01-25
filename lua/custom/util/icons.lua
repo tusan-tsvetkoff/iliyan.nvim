@@ -9,6 +9,9 @@ M.diagnostics = {
   Hint = '',
 }
 
+---@type table<string>
+M.clock = {}
+
 ---@type table<string, string>
 M.git = {
   Branch = '',
@@ -20,6 +23,7 @@ M.git = {
   Unstaged = '󱋭',
   Staged = '',
   Conflict = '',
+  Gutter = '\u{258B}',
 }
 
 ---@type table<string, string>
@@ -58,6 +62,20 @@ M.cmp_kinds = {
   Operator = '  ',
   TypeParameter = '  ',
   CmpItemKindCopilot = '  ',
+}
+
+---@type table<string>
+M.loading_sequence = {
+  '⠋',
+  '⠙',
+  '⠹',
+  '⠸',
+  '⠼',
+  '⠴',
+  '⠦',
+  '⠧',
+  '⠇',
+  '⠏',
 }
 
 ---@type table<string, string>

@@ -29,6 +29,12 @@ return {
     return require 'custom.config.cmp'
   end,
   config = function(_, opts)
-    require('cmp').setup(opts)
+    local cmp = require 'cmp'
+    cmp.setup(opts)
+    local presentAutopairs, cmp_autopairs = pcall(require, 'nvim-autopairs.completion.cmp')
+    if not presentAutopairs then
+      return
+    end
+    cmp.event:on('confirm_done', cmp_autopairs.on_confirm_done { map_char = { tex = '' } })
   end,
 }

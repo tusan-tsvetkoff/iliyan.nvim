@@ -8,6 +8,21 @@ autocmd('FileType', {
   end,
 })
 
+-- Dap
+vim.api.nvim_create_autocmd('LspAttach', {
+  callback = function()
+    local neodev = require 'neodev'
+    neodev.setup {
+      library = {
+        plugins = {
+          'nvim-dap-ui',
+          types = true,
+        },
+      },
+    }
+  end,
+})
+
 -- Notify when coming back to a file that does not exist anymore
 autocmd('FocusGained', {
   callback = function()

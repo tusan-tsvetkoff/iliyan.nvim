@@ -45,7 +45,7 @@ M.config = {
   options = {
     component_separators = '',
     section_separators = '',
-    theme = 'tokyonight',
+    theme = 'kanagawa',
   },
   sections = {
     lualine_a = {},

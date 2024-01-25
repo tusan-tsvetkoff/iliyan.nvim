@@ -98,37 +98,17 @@ local options = {
     completeopt = 'menu,menuone,noinsert',
   },
 
-  -- window = {
-  --   completion = {
-  --     scrollbar = false,
-  --     border = border 'CmpDscBorder',
-  --   },
-  --   documentation = {
-  --     border = border 'CmpDscBorder',
-  --     winhighlight = 'Normal:CmpDoc',
-  --   },
-  -- },
-
-  -- `/` cmdline setup.
-  cmp.setup.cmdline('/', {
-    mapping = cmp.mapping.preset.cmdline(),
-    sources = {
-      { name = 'buffer' },
+  window = {
+    completion = cmp.config.window.bordered {
+      winhighlight = 'Normal:Normal,FloatBorder:LspBorderBG,CursorLine:PmenuSel,Search:None',
     },
-  }),
-
-  -- `:` cmdline setup.
-  cmp.setup.cmdline(':', {
-    mapping = cmp.mapping.preset.cmdline(),
-    sources = cmp.config.sources({
-      { name = 'path' },
-    }, {
-      { name = 'cmdline', option = {
-        ignore_cmds = { 'w' },
-      } },
-    }),
-  }),
-
+    documentation = cmp.config.window.bordered {
+      winhighlight = 'Normal:Normal,FloatBorder:LspBorderBG,CursorLine:PmenuSel,Search:None',
+    },
+  },
+  view = {
+    entries = 'bordered',
+  },
   sources = {
     {
       name = 'nvim_lsp_signature_help',
